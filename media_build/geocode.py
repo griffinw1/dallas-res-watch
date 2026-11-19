@@ -2,6 +2,7 @@
 """venues.json -> map/geo.json (lat/lng per venue for the Map page).
 
   python3 media_build/geocode.py            # geocode every venue, write map/geo.json
+  python3 media_build/geocode.py --only "Nuri Steakhouse" "Stillwell's"   # redo just these, merge into geo.json
 
 Sources, in order:
   1. Resy venues: Resy's public venue API (location.latitude/longitude).
@@ -62,18 +63,20 @@ ADDR = {
     "Apothecary": "1922 Greenville Ave",
     "Georgie": "4514 Travis St",
     "Hillstone": "8300 Preston Rd",
-    "Stillwell's": "2598 Harwood St",
+    "Stillwell's": "2575 McKinnon St",  # Hotel Swexan, 7th floor
     "Bar Colette": "3699 McKinney Ave",
     "Otaru Sushi & Handroll Bar": "408 W 8th St",
     "Kilmac's": "814 W Davis St",
     "Mike's Gemini Twin Lounge": "1906 S Harwood St",
     "Clifton Club Bar & Lounge": "3333 N Fitzhugh Ave",
-    "Tatsu Dallas": "3309 Elm St",
-    "Purepecha and Revolver Taco Lounge": "2701 Main St",
+    "Tatsu Dallas": "3309 Elm St",  # Continental Gin Building, Suite 120 (Michelin guide)
+    "Purepecha and Revolver Taco Lounge": "2701 Main St",  # Suite 120 (OpenTable)
+    "Nuri Steakhouse": "2401 Cedar Springs Rd",  # Suite 120 (nuristeakhouse.com)
 }
 
 # Addresses recalled from memory, not confirmed on the venue's own page: flagged approx.
-UNVERIFIED = {"Tatsu Dallas", "Purepecha and Revolver Taco Lounge", "Stillwell's", "Apothecary"}
+# (Nov 19: Tatsu, Purepecha, Stillwell's, Apothecary and Nuri confirmed against official/listing pages.)
+UNVERIFIED: set[str] = set()
 
 # Rough neighbourhood centres + how far (km) a pin may sit from them before it is "approx".
 HOODS = {
@@ -142,8 +145,15 @@ def pick(hits: list, hood) -> tuple | None:
 
 
 def main() -> None:
+    import sys
     venues = json.loads((ROOT / "venues.json").read_text())
     out, missing = {}, []
+    only = sys.argv[sys.argv.index("--only") + 1:] if "--only" in sys.argv else None
+    if only:  # keep every other venue as it is
+        prev = json.loads(OUT.read_text())
+        out = {k: r for k, r in prev["venues"].items() if k not in only}
+        missing = [n for n in prev.get("missing", []) if n not in only]
+        venues = [v for v in venues if v["name"] in only]
     for v in venues:
         name, hood = v["name"], v.get("hood")
         pt, src = None, None

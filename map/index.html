@@ -4,15 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cut">
 <title>Dallas Tables Map</title>
+<link rel="icon" href="data:,">
 <meta name="description" content="Map of Dallas restaurants and bars with live open tables for 4, Nov 20–28 2026. Read-only: every link opens the venue's own booking page.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
 <style>
 :root{--bg:#f6f3ee;--paper:#fffdf9;--ink:#1c1a17;--soft:#6b655c;--faint:#a39c91;--line:#e7e1d6;
 --accent:#a2382b;--accent-ink:#fff;--open:#1f6b46;--openbg:#e8f2ea;--chip:#f0ebe2;--gold:#b0862f;
 --chip-core:#1c1a17;--chip-core-ink:#fffdf9;
---shadow:0 1px 2px rgba(40,30,20,.06),0 8px 24px -12px rgba(40,30,20,.18);--r:16px;color-scheme:light}
+--shadow:0 1px 2px rgba(40,30,20,.06),0 8px 24px -12px rgba(40,30,20,.18);--r:16px;color-scheme:light;
+--ease-out:cubic-bezier(.2,.8,.2,1);--ease-spring:cubic-bezier(.34,1.4,.64,1);--dur-1:150ms;--dur-2:220ms;--dur-3:280ms}
 @media (prefers-color-scheme:dark){:root{--bg:#121110;--paper:#1b1a18;--ink:#f1ece4;--soft:#aaa396;--faint:#6f695f;--line:#2c2a26;
 --accent:#e0705d;--accent-ink:#1a0f0c;--open:#7fd3a4;--openbg:#18291f;--chip:#24221f;--gold:#d9b25e;--chip-core:#f1ece4;--chip-core-ink:#121110;
 --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);color-scheme:dark}}
@@ -26,41 +29,84 @@ a{color:inherit}button{font:inherit}
 -webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line);padding:10px 16px 10px;padding-top:max(10px,env(safe-area-inset-top))}
 .bar-in{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;max-width:1400px;margin:0 auto}
 .r1{display:flex;align-items:center;gap:10px;min-width:0;flex:0 0 auto}
-.switch{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
-.switch a{padding:5px 14px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:var(--soft)}
-.switch a[aria-current="page"]{background:var(--chip-core);color:var(--chip-core-ink)}
+.switch{position:relative;display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
+.switch a{position:relative;z-index:1;padding:5px 14px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:var(--soft);
+transition:color var(--dur-2) var(--ease-out),transform var(--dur-2) var(--ease-spring)}
+.switch a[aria-current="page"]{color:var(--chip-core-ink)}
+.switch:not(.kit-on) a[aria-current="page"]{background:var(--chip-core)}
 .switch a:not([aria-current]):hover{color:var(--ink)}
+.switch .kit-ind{background:var(--chip-core);border-radius:999px;box-shadow:0 2px 8px -2px rgba(0,0,0,.25)}
+.switch:has(.kit-go) a[aria-current="page"]{color:var(--soft)}
+.switch a.kit-go{color:var(--chip-core-ink)}
+.kit-ind{position:absolute;left:0;top:0;z-index:0;pointer-events:none;opacity:0;
+transition:transform var(--dur-3) var(--ease-spring),width var(--dur-3) var(--ease-spring),height var(--dur-3) var(--ease-spring),opacity var(--dur-1) linear}
+.kit-tap{transition:transform var(--dur-2) var(--ease-spring),box-shadow var(--dur-2) var(--ease-out),background-color var(--dur-1),color var(--dur-1),border-color var(--dur-1),filter var(--dur-1)}
+.kit-tap:active{transform:scale(.96);transition-duration:90ms}
 .ttl{font-size:26px;line-height:1;margin:0;white-space:nowrap}
-.seg{display:inline-flex;background:var(--chip);border-radius:999px;padding:3px;flex:0 0 auto}
-.seg button{border:0;background:none;color:var(--soft);font-weight:500;font-size:13px;padding:5px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.seg{position:relative;display:inline-flex;background:var(--chip);border-radius:999px;padding:3px;flex:0 0 auto}
+.seg button{position:relative;z-index:1;border:0;background:none;color:var(--soft);font-weight:500;font-size:13px;padding:5px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
 .seg button.on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
-.days{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1 1 360px;min-width:0}
+.seg.kit-on button.on{background:none;box-shadow:none}
+.seg .kit-ind{background:var(--paper);border-radius:999px;box-shadow:var(--shadow)}
+.days{position:relative;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1 1 360px;min-width:0}
 .days::-webkit-scrollbar{display:none}
-.days button{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:13px;padding:5px 9px;border-radius:10px;cursor:pointer;line-height:1.1;text-align:center}
+.days button{position:relative;z-index:1;flex:0 0 auto;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:13px;padding:5px 9px;border-radius:10px;cursor:pointer;line-height:1.1;text-align:center}
 .days button small{display:block;color:var(--faint);font-size:11px}
 .days button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}.days button.on small{color:inherit;opacity:.7}
+.days.kit-on button.on{background:none}
+.days .kit-ind{background:var(--ink);border-radius:10px}
 .info{font-size:12px;color:var(--soft);white-space:nowrap}
 /* map */
 #map{flex:1 1 auto;min-height:0;background:var(--bg);z-index:1}
 .leaflet-container{font:inherit;background:var(--bg)}
-body.osm .leaflet-tile-pane{filter:saturate(.55) sepia(.12) brightness(1.02)}
-@media (prefers-color-scheme:dark){body.osm .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) saturate(.35) brightness(.82) contrast(.92)}}
+body.osm.b-streets .leaflet-tile-pane{filter:saturate(.55) sepia(.12) brightness(1.02)}
+.mul{mix-blend-mode:multiply}
+@media (prefers-color-scheme:dark){body.osm.b-streets .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) saturate(.35) brightness(.82) contrast(.92)}
+ body.b-terrain .leaflet-tile-pane{filter:brightness(.66) saturate(.85) contrast(1.05)}
+ body.b-sat .leaflet-tile-pane{filter:brightness(.72) saturate(.9)}}
+/* basemap switcher */
+.bm{position:absolute;z-index:950;top:12px;left:58px;display:flex;align-items:center;gap:0;background:color-mix(in srgb,var(--paper) 88%,transparent);
+backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border:1px solid var(--line);box-shadow:var(--shadow)}
+.bm button{display:inline-flex;align-items:center;gap:6px}
+.bm svg{width:15px;height:15px;flex:0 0 auto;opacity:.8}
+.leaflet-touch .leaflet-bar,.leaflet-bar{border:1px solid var(--line)!important;border-radius:12px;overflow:hidden;box-shadow:var(--shadow)!important}
 .leaflet-control-attribution{font-size:10px;background:color-mix(in srgb,var(--paper) 80%,transparent)!important;color:var(--soft)}
 .leaflet-control-attribution a{color:var(--soft)}
-.leaflet-bar a{background:var(--paper);color:var(--ink);border-color:var(--line)}
+.leaflet-bar a{background:var(--paper);color:var(--ink);border-color:var(--line)!important}
 .leaflet-bar a:hover{background:var(--chip)}
 .pinw{background:none;border:0;display:grid!important;place-items:center}
 .zfar .pin{width:27px;height:27px;font-size:10.5px;border-width:1.5px}.zfar .pin.mono{font-size:15px}.zfar .pin i{top:-8px;right:-10px;min-width:17px;height:17px;font-size:10px}
+.pin i .n1{display:none}.pin i .w{margin-left:.28em}.pin i .n1{margin-left:1px}.zfar .pin i .w{display:none}.zfar .pin i .n1{display:inline}
 .pin{position:relative;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--sc,#7a7368);color:#fff;font-weight:700;font-size:12.5px;
 font-variant-numeric:tabular-nums;line-height:1;border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);cursor:pointer;transition:transform .15s ease,opacity .2s}
 .pin.mono{font-family:"Instrument Serif",Georgia,serif;font-size:19px;font-weight:400;background:#7a7368;padding-top:2px}
 .pin.bar{border-radius:10px}
 .pin.dim{opacity:.42;filter:grayscale(.9)}
 .pin.approx{border-style:dashed}
-.pin.sel{transform:scale(1.25);box-shadow:0 0 0 3px var(--ink),0 6px 16px rgba(0,0,0,.4)}
-.pin:hover{transform:scale(1.12)}
-.pin i{position:absolute;top:-7px;right:-9px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--open);color:var(--paper);
-font-style:normal;font-family:Inter,sans-serif;font-size:11px;font-weight:700;display:grid;place-items:center;border:1.5px solid var(--paper);line-height:1}
+.pin.sel{transform:scale(1.28);box-shadow:0 0 0 3px var(--paper),0 0 0 5.5px var(--ink),0 10px 22px rgba(0,0,0,.45);animation:pinPop 420ms var(--ease-spring)}
+.pin.sel.dim{opacity:1;filter:none}
+.pin.sel::after{content:"";position:absolute;inset:-4px;border-radius:inherit;border:2.5px solid var(--sc,#7a7368);animation:halo 1.8s var(--ease-out) infinite;pointer-events:none}
+@keyframes pinPop{0%{transform:scale(1)}55%{transform:scale(1.4)}100%{transform:scale(1.28)}}
+@keyframes halo{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.1);opacity:0}}
+.pin:hover{transform:scale(1.12)}.pin.sel:hover{transform:scale(1.28)}
+.pin:active{transform:scale(.94)}
+/* clusters */
+.cluw{background:none;border:0}
+.clu{position:relative;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;align-content:center;gap:0;background:var(--sc,#7a7368);color:#fff;
+border:2.5px solid #fff;box-shadow:0 0 0 5px color-mix(in srgb,var(--sc,#7a7368) 28%,transparent),0 4px 14px rgba(0,0,0,.38);cursor:pointer;line-height:1;
+font-variant-numeric:tabular-nums;transition:transform var(--dur-2) var(--ease-spring)}
+.clu:hover{transform:scale(1.08)}.clu:active{transform:scale(.94)}
+.clu b{font-size:15px;font-weight:750;line-height:1}
+.clu small{font-size:9.5px;font-weight:700;opacity:.92;margin-top:1px;letter-spacing:.02em}
+.clu i{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);min-width:19px;height:19px;padding:0 6px;border-radius:999px;background:var(--open);color:var(--paper);font-style:normal;
+font-size:10.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--paper);white-space:nowrap}
+.clu.dim{filter:grayscale(.85);opacity:.6}
+.leaflet-cluster-anim .leaflet-marker-icon,.leaflet-cluster-anim .leaflet-marker-shadow{transition:transform .3s var(--ease-out),opacity .3s ease-in}
+.tip{background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);font-weight:600;font-size:12.5px;padding:4px 9px}
+.tip::before{display:none}
+.pin i{white-space:nowrap;position:absolute;top:-7px;right:-9px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--open);color:var(--paper);
+font-style:normal;font-family:Inter,sans-serif;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--paper);line-height:1}
 .legend{position:absolute;left:12px;bottom:22px;z-index:900;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 border:1px solid var(--line);border-radius:12px;padding:7px 10px;font-size:11px;color:var(--soft);box-shadow:var(--shadow);display:flex;flex-wrap:wrap;gap:4px 10px;max-width:calc(100% - 24px)}
 .legend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
@@ -72,12 +118,16 @@ padding:6px 14px;font-size:13px;color:var(--soft);box-shadow:var(--shadow);white
 /* sheet / side card */
 .sheet{position:absolute;z-index:1100;background:var(--paper);color:var(--ink);box-shadow:0 -10px 40px -10px rgba(0,0,0,.35);overflow-y:auto;overscroll-behavior:contain;
 transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
-.sheet{left:0;right:0;bottom:0;max-height:72%;border-radius:20px 20px 0 0;transform:translateY(105%);padding-bottom:env(safe-area-inset-bottom)}
+.sheet{left:0;right:0;bottom:0;max-height:64%;border-radius:22px 22px 0 0;transform:translateY(105%);padding-bottom:env(safe-area-inset-bottom);
+border-top:1px solid var(--line);box-shadow:0 -14px 44px -12px rgba(0,0,0,.4)}
+.sheet.drag{transition:none}
 .sheet.open{transform:none}
 @media (min-width:860px){.sheet{left:auto;right:16px;top:16px;bottom:16px;width:390px;max-height:none;border-radius:var(--r);border:1px solid var(--line);transform:translateX(calc(100% + 24px))}
 .sheet.open{transform:none}.grab{display:none}.legend{bottom:22px}}
-.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:8px auto 0;flex:0 0 auto}
-.close{position:absolute;top:10px;right:10px;z-index:3;width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.grab{width:40px;height:5px;border-radius:3px;background:color-mix(in srgb,var(--faint) 55%,transparent);margin:8px auto 0;flex:0 0 auto;touch-action:none}
+.close{position:absolute;top:10px;right:10px;z-index:3;width:34px;height:34px;border-radius:50%;border:0;background:rgba(20,16,12,.5);color:#fff;font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center;
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:transform var(--dur-2) var(--ease-spring),background-color var(--dur-1)}
+.close:hover{background:rgba(20,16,12,.7)}.close:active{transform:scale(.9)}
 .ph{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#3b2a22,#7a4a33 55%,#c08a57);flex:0 0 auto;overflow:hidden}
 .sheet .ph{margin:10px 12px 0;border-radius:14px}
 @media (min-width:860px){.sheet .ph{margin:0;border-radius:0}}
@@ -106,30 +156,37 @@ transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:c
 .dish{font-size:12px;background:var(--chip);border-radius:999px;padding:3px 9px}
 .dish i{font-style:normal;color:var(--faint);margin-left:4px}
 .strip{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}
-.strip button{border:1px solid var(--line);background:none;border-radius:8px;padding:4px 0;font-size:11px;color:var(--faint);cursor:pointer;line-height:1.15;min-width:0}
+.strip button{transition:transform var(--dur-2) var(--ease-spring);border:1px solid var(--line);background:none;border-radius:8px;padding:4px 0;font-size:11px;color:var(--faint);cursor:pointer;line-height:1.15;min-width:0}
 .strip button b{display:block;font-size:13px;color:var(--soft)}
 .strip button.has{background:var(--openbg);border-color:color-mix(in srgb,var(--open) 35%,transparent);color:var(--open)}
 .strip button.has b{color:var(--open)}
 .strip button.sel{outline:2px solid var(--ink);outline-offset:-1px}
 .times{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;align-items:center}
 .time{display:inline-block;text-decoration:none;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--open);border:1.5px solid var(--open);border-radius:9px;padding:6px 10px}
-.time:hover{background:var(--open);color:var(--paper)}
+.time{transition:transform var(--dur-2) var(--ease-spring),background-color var(--dur-1),color var(--dur-1)}
+.time:hover{background:var(--open);color:var(--paper)}.time:active{transform:scale(.95)}
 .time.stale{opacity:.55;border-style:dashed}
 .empty{color:var(--faint);font-size:13px;font-style:italic}
 .book{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:var(--accent);color:var(--accent-ink);font-weight:650;font-size:16px;padding:14px;border-radius:12px}
-.book:hover{filter:brightness(1.08)}.book:active{transform:scale(.98)}
+.book{transition:transform var(--dur-2) var(--ease-spring),filter var(--dur-1);box-shadow:0 6px 18px -8px color-mix(in srgb,var(--accent) 70%,transparent)}
+.book:hover{filter:brightness(1.08)}.book:active{transform:scale(.97)}
+.book.ghost{box-shadow:none}
 .book.ghost{background:var(--chip);color:var(--ink)}
 .acts2{display:flex;flex-wrap:wrap;gap:8px}
 .sbtn{flex:1 1 0;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:1px solid var(--line);font-size:13px;font-weight:550;padding:9px 12px;border-radius:12px;background:var(--paper);white-space:nowrap}
-.sbtn:hover{border-color:var(--ink)}
+.sbtn{transition:transform var(--dur-2) var(--ease-spring),border-color var(--dur-1)}.sbtn:hover{border-color:var(--ink)}.sbtn:active{transform:scale(.96)}
 .approxn{font-size:12px;color:var(--faint)}
 .hide{display:none!important}
 @media (max-width:640px){
  .bar{padding:8px 16px}.ttl{display:none}.info{display:none}
  .bar-in{gap:7px 8px}.r1{flex:1 1 100%;justify-content:space-between}
  .switch a{padding:5px 9px;font-size:12px}.seg button{padding:5px 8px;font-size:12px}.seg.when{flex:1 1 100%;display:flex}.seg.when button{flex:1;padding:5px 4px;font-size:12px}
- .days{flex:1 1 100%}.name{font-size:27px}.leaflet-control-zoom{display:none}.empty-msg{white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 32px)}.sheet .ph{aspect-ratio:2/1}
+ .days{flex:1 1 100%}.name{font-size:27px}.leaflet-control-zoom{display:none}.empty-msg{top:58px;white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 32px)}.sheet .ph{aspect-ratio:2/1}
+ .bm{left:12px;top:12px}.bm button{padding:6px 10px}
+ .legend{bottom:44px;left:16px;max-width:calc(100% - 32px)}.leaflet-control-attribution{font-size:9px;line-height:1.3}
+ .body{padding:12px 16px 18px}
 }
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:1ms!important}}
 </style>
 </head>
 <body>
@@ -145,11 +202,63 @@ transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:c
 </div></header>
 <div class="stage">
   <div id="map" role="application" aria-label="Map of venues"></div>
+  <div class="seg bm" id="bm" role="group" aria-label="Map style">
+    <button data-bm="streets" title="Streets"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 13 6 3h4l4 10M8 4v2m0 2v2m0 2v1"/></svg>Streets</button>
+    <button data-bm="terrain" title="Terrain"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M1 13 6 5l3 4.5L11 7l4 6Z"/></svg>Terrain</button>
+    <button data-bm="sat" title="Satellite"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12"/></svg>Satellite</button>
+  </div>
   <div class="legend" id="legend"></div>
   <div class="empty-msg hide" id="emsg"></div>
   <aside class="sheet" id="sheet" aria-live="polite" aria-label="Venue details"></aside>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<script>
+// tactile layer: sliding selection pill + press feedback + page-switch slide (mirrors render.py KIT_JS / trip/index.html)
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)'), still = () => RM.matches;
+  const buzz = () => { try { navigator.vibrate && navigator.vibrate(8); } catch (e) {} };
+  function place(ind, p, anim) {
+    if (!anim) ind.style.transition = 'none';
+    ind.style.width = p.w + 'px'; ind.style.height = p.h + 'px';
+    ind.style.transform = `translate3d(${p.x}px,${p.y}px,0)`; ind.style.opacity = 1;
+    if (!anim) { void ind.offsetWidth; ind.style.transition = ''; }
+  }
+  function slide(box, target, anim = true) {
+    if (!box) return;
+    let ind = box._kInd;
+    if (!ind) {
+      ind = box._kInd = document.createElement('span'); ind.className = 'kit-ind'; ind.setAttribute('aria-hidden', 'true');
+      box.classList.add('kit-on');
+      if ('ResizeObserver' in window) new ResizeObserver(() => slide(box, null, false)).observe(box);
+    }
+    if (ind.parentNode !== box) { box.prepend(ind); if (box._kPos) place(ind, box._kPos, false); }
+    const a = target || box.querySelector('.kit-go') || box.querySelector('.on,[aria-current="page"]');
+    if (!a) { ind.style.opacity = 0; box._kPos = null; return; }
+    if (!a.offsetWidth) return;
+    const p = {x: a.offsetLeft, y: a.offsetTop, w: a.offsetWidth, h: a.offsetHeight};
+    place(ind, p, anim && !!box._kPos && !still());
+    box._kPos = p;
+    if (box.scrollWidth > box.clientWidth + 2) {
+      const l = box.scrollLeft, r = l + box.clientWidth;
+      if (p.x < l || p.x + p.w > r) box.scrollTo({left: p.x - (box.clientWidth - p.w) / 2, behavior: still() ? 'auto' : 'smooth'});
+    }
+  }
+  document.addEventListener('click', e => { if (e.target.closest && e.target.closest('.seg button,.days button,.strip button,.time,.book,.sbtn,.switch a')) buzz(); }, true);
+  const boot = () => document.querySelectorAll('.switch').forEach(sw => {
+    slide(sw, null, false);
+    sw.addEventListener('click', e => {
+      const a = e.target.closest('a');
+      if (!a || a.hasAttribute('aria-current') || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button || still()) return;
+      e.preventDefault(); sw.querySelectorAll('a').forEach(x => x.classList.toggle('kit-go', x === a)); slide(sw, a);
+      setTimeout(() => { location.href = a.href; }, 180);
+    });
+  });
+  addEventListener('pageshow', e => { if (e.persisted) document.querySelectorAll('.switch').forEach(sw => { sw.querySelectorAll('.kit-go').forEach(x => x.classList.remove('kit-go')); slide(sw, null, false); }); });
+  window.Kit = {slide, buzz, still};
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
 <script>
 (async () => {
 const $ = (s, e = document) => e.querySelector(s);
@@ -243,50 +352,119 @@ function stripHtml(v, cur) {
 
 // ---- map ----
 const dark = matchMedia('(prefers-color-scheme: dark)');
-const map = L.map('map', {zoomControl: true, attributionControl: true}).setView([32.81, -96.80], 12);
+const map = L.map('map', {zoomControl: true, attributionControl: true, wheelPxPerZoomLevel: 90}).setView([32.81, -96.80], 12);
 map.zoomControl.setPosition('topleft');
 const CARTO = s => `https://{s}.basemaps.cartocdn.com/${s}/{z}/{x}/{y}{r}.png`;
+const ESRI = s => `https://server.arcgisonline.com/ArcGIS/rest/services/${s}/MapServer/tile/{z}/{y}/{x}`;
+const A = (h, t) => `<a href="${h}" target="_blank" rel="noopener">${t}</a>`;
+const OSM_ATT = '&copy; ' + A('https://www.openstreetmap.org/copyright', 'OpenStreetMap') + ' contributors';
+const ESRI_TOPO_ATT = 'Tiles &copy; ' + A('https://www.esri.com', 'Esri') + ' &mdash; Esri, USGS, NOAA, HERE, Garmin, FAO, NPS, ' + OSM_ATT + ', and the GIS User Community';
+const ESRI_SAT_ATT = 'Imagery &copy; ' + A('https://www.esri.com', 'Esri') + ' &mdash; Maxar, Earthstar Geographics, USDA, USGS, and the GIS User Community';
 const CARTO_ATT = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
-let tiles, tileOk = 0, tileErr = 0, useOSM = false;
+// Basemaps: Streets (warm CARTO / OSM), Terrain (Esri shaded relief with the Esri topo map multiplied on top, so Dallas's
+// creek valleys + the Trinity floodplain read as relief under crisp labels), Satellite (Esri imagery + roads + place labels).
+let tiles = null, tileOk = 0, tileErr = 0, useOSM = false;
+let base = 'streets'; try { base = localStorage.getItem('drwBase') || 'streets'; } catch (e) {}
+if (!['streets', 'terrain', 'sat'].includes(base)) base = 'streets';
+function streetsLayer() {
+  const t = useOSM
+    ? L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: OSM_ATT})
+    : L.tileLayer(CARTO(dark.matches ? 'dark_all' : 'light_all'), {maxZoom: 20, subdomains: 'abcd', attribution: CARTO_ATT});
+  t.on('tileload', () => tileOk++);
+  t.on('tileerror', () => { tileErr++; if (!useOSM && tileErr >= 4 && tileOk === 0) { useOSM = true; setTiles(); } });
+  return t;
+}
 function setTiles() {
   if (tiles) map.removeLayer(tiles);
   document.body.classList.toggle('osm', useOSM);
-  tiles = useOSM
-    ? L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'})
-    : L.tileLayer(CARTO(dark.matches ? 'dark_all' : 'light_all'), {maxZoom: 20, subdomains: 'abcd', attribution: CARTO_ATT});
-  tiles.on('tileload', () => tileOk++);
-  tiles.on('tileerror', () => { tileErr++; if (!useOSM && tileErr >= 4 && tileOk === 0) { useOSM = true; setTiles(); } });
+  ['streets', 'terrain', 'sat'].forEach(b => document.body.classList.toggle('b-' + b, b === base));
+  tiles = base === 'terrain' ? L.layerGroup([
+      L.tileLayer(ESRI('World_Shaded_Relief'), {maxZoom: 19, maxNativeZoom: 13, attribution: ESRI_TOPO_ATT}),
+      L.tileLayer(ESRI('World_Topo_Map'), {maxZoom: 19, className: 'mul'})])
+    : base === 'sat' ? L.layerGroup([
+      L.tileLayer(ESRI('World_Imagery'), {maxZoom: 19, attribution: ESRI_SAT_ATT}),
+      L.tileLayer(ESRI('Reference/World_Transportation'), {maxZoom: 19, opacity: .5}),
+      L.tileLayer(ESRI('Reference/World_Boundaries_and_Places'), {maxZoom: 19})])
+    : streetsLayer();
   tiles.addTo(map);
+  document.querySelectorAll('[data-bm]').forEach(b => { b.classList.toggle('on', b.dataset.bm === base); b.setAttribute('aria-pressed', b.dataset.bm === base); });
+  Kit.slide($('#bm'));
 }
 // CARTO now answers keyless requests with an "API key required" placeholder (a tiny ~2 KB PNG) instead of an
 // error, so probe one downtown tile first: a real one is far bigger. Anything odd -> OpenStreetMap tiles.
-try {
-  const ctl = new AbortController(); setTimeout(() => ctl.abort(), 3500);
-  const r = await fetch('https://a.basemaps.cartocdn.com/light_all/14/3786/6611.png', {signal: ctl.signal, cache: 'force-cache'});
-  useOSM = !r.ok || (await r.blob()).size < 4000;
-} catch (e) { useOSM = true; }
+if (base === 'streets') {
+  try {
+    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 2500);
+    const r = await fetch('https://a.basemaps.cartocdn.com/light_all/14/3786/6611.png', {signal: ctl.signal, cache: 'force-cache'});
+    useOSM = !r.ok || (await r.blob()).size < 4000;
+  } catch (e) { useOSM = true; }
+} else useOSM = true;  // probe again only if they switch back to Streets
+let probed = base === 'streets';
 setTiles();
-dark.addEventListener?.('change', () => { if (!useOSM) setTiles(); });
+dark.addEventListener?.('change', () => { if (base === 'streets' && !useOSM) setTiles(); });
+document.querySelectorAll('[data-bm]').forEach(b => b.classList.add('kit-tap'));
+$('#bm').addEventListener('click', async e => {
+  const b = e.target.closest('[data-bm]'); if (!b || b.dataset.bm === base) return;
+  base = b.dataset.bm; try { localStorage.setItem('drwBase', base); } catch (er) {}
+  Kit.slide($('#bm'), b);
+  if (base === 'streets' && !probed) { probed = true; try { const r = await fetch('https://a.basemaps.cartocdn.com/light_all/14/3786/6611.png', {cache: 'force-cache'}); useOSM = !r.ok || (await r.blob()).size < 4000; } catch (er) { useOSM = true; } }
+  setTiles();
+});
+L.DomEvent.disableClickPropagation($('#bm')); L.DomEvent.disableScrollPropagation($('#bm'));
 map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
 
 $('#legend').innerHTML = [['9+', '#1f6b46'], ['8.5', '#2f7d55'], ['8', '#5b8a3a'], ['7', '#a07a20'], ['no score', '#7a7368']].map(([l, c]) => `<span><b style="background:${c}"></b>${l}</span>`).join('')
-  + `<span><b class="sq"></b>bar</span><span><b style="background:var(--open)"></b>open times</span>`;
+  + `<span><b class="sq"></b>bar</span><span><b style="background:var(--open)"></b>open nights · or times on a day</span>`;
 
 const markers = new Map();
 let selName = null;
 const missing = V.filter(v => !v.geo).map(v => v.name);
+const HOVER = matchMedia('(hover: hover) and (pointer: fine)').matches;
+// Pins that overlap (Uptown, Lower Greenville) group into clusters: count of places + best Beli score inside,
+// coloured by that best score; tap zooms in, and at max zoom they fan out (spiderfy).
+const isLit = v => !v.closed && ONLINE.includes(v.platform) && countFor(v) > 0;
+const cluster = L.markerClusterGroup({
+  showCoverageOnHover: false, spiderfyOnMaxZoom: true, zoomToBoundsOnClick: true, removeOutsideVisibleBounds: true,
+  maxClusterRadius: z => z >= 16 ? 26 : z >= 14 ? 42 : z >= 12 ? 60 : 80,
+  spiderLegPolylineOptions: {weight: 1.5, color: '#6b655c', opacity: .7},
+  iconCreateFunction: c => {
+    const vs = c.getAllChildMarkers().map(m => m._v);
+    const best = vs.reduce((b, v) => v.avg != null && (b == null || v.avg > b) ? v.avg : b, null);
+    const lit = vs.filter(isLit).length;
+    const lab = `${vs.length} places${best != null ? ', best Beli ' + best.toFixed(1) : ''}${lit ? ', ' + lit + ' with tables' : ''}`;
+    return L.divIcon({className: 'cluw', iconSize: [42, 42], iconAnchor: [21, 21],
+      html: `<div class="clu${lit ? '' : ' dim'}" style="--sc:${scoreCol(best)}" title="${esc(lab)}" aria-label="${esc(lab)}"><b>${vs.length}</b>${best != null ? `<small>★${best.toFixed(1)}</small>` : ''}${lit ? `<i>${lit} open</i>` : ''}</div>`});
+  },
+});
+cluster.addTo(map);
 V.filter(v => v.geo).forEach(v => {
-  const mk = L.marker([v.geo.lat, v.geo.lng], {keyboard: true, title: v.name, riseOnHover: true});
+  const mk = L.marker([v.geo.lat, v.geo.lng], {keyboard: true, title: HOVER ? '' : v.name, alt: v.name, riseOnHover: true});
+  mk._v = v;
   mk.on('click', () => openSheet(v.name));
+  if (HOVER) mk.bindTooltip(v.name, {direction: 'top', offset: [0, -18], className: 'tip', opacity: 1});
   markers.set(v.name, mk);
 });
+// The selected pin leaves its cluster while its card is open, so it is always visible (and on top).
+let solo = null;
+function unsolo() { if (!solo) return; const m = solo; solo = null; if (map.hasLayer(m)) map.removeLayer(m); if (m._inPool) cluster.addLayer(m); }
+function makeSolo(mk) { if (solo === mk) return; unsolo(); if (cluster.hasLayer(mk)) cluster.removeLayer(mk); mk.addTo(map); solo = mk; }
+const icon = v => { const p = pinHtml(v); return L.divIcon({className: 'pinw', html: p.html, iconSize: [34, 34], iconAnchor: [17, 17]}); };
+function paint(n) { const mk = markers.get(n), v = V.find(x => x.name === n); if (!mk || !v) return; mk.setIcon(icon(v)); mk.setZIndexOffset(n === selName ? 10000 : pinHtml(v).dim ? 0 : 500 + Math.round((v.avg || 0) * 20)); }
 
+// Badge: with "All" days = how many nights have a table (6 nights); with one day picked = that day's open times.
+const nightsOpen = v => dates.filter(d => slotsFor(v, d).length).length;
 function pinHtml(v) {
-  const n = countFor(v), online = ONLINE.includes(v.platform) && !v.closed;
+  const online = ONLINE.includes(v.platform) && !v.closed;
+  const n = online ? countFor(v) : 0;
   const dim = v.closed || (online && n === 0);
   const cls = ['pin', v.avg == null ? 'mono' : '', v.kind === 'bar' ? 'bar' : '', dim ? 'dim' : '', v.geo.approx ? 'approx' : '', v.name === selName ? 'sel' : ''].filter(Boolean).join(' ');
   const lab = v.avg != null ? v.avg.toFixed(1) : esc(v.name.replace(/^the\s+/i, '')[0]);
-  return {html: `<div class="${cls}" style="--sc:${scoreCol(v.avg)}">${lab}${online && n ? `<i>${n > 99 ? '99+' : n}</i>` : ''}</div>`, dim};
+  let badge = '';
+  if (online && n) {
+    if (state.day === 'all') { const k = nightsOpen(v); badge = `<i title="${k} of ${dates.length} nights with a table">${k}<span class="w"> night${k === 1 ? '' : 's'}</span><span class="n1">n</span></i>`; }
+    else badge = `<i title="${n} open time${n === 1 ? '' : 's'}">${n}</i>`;
+  }
+  return {html: `<div class="${cls}" style="--sc:${scoreCol(v.avg)}">${lab}${badge}</div>`, dim};
 }
 
 let fitted = false;
@@ -298,25 +476,26 @@ function render(fit = true) {
     const n = pool.filter(v => slotsFor(v, d).length).length;
     return `<button data-d="${d}" class="${state.day === d ? 'on' : ''}">${dow(d)} ${dnum(d)}<small>${n} open</small></button>`;
   }).join('');
-  document.querySelectorAll('#days button').forEach(b => b.onclick = () => { state.day = b.dataset.d; render(); });
-  const lit = [], shown = [];
+  document.querySelectorAll('#days button').forEach(b => { b.classList.add('kit-tap'); b.onclick = () => { state.day = b.dataset.d; render(false); }; });
+  Kit.slide($('.seg.kind')); Kit.slide($('.seg.when')); Kit.slide($('#days'));
+  const lit = [], shown = [], add = [];
   markers.forEach((mk, name) => {
     const v = V.find(x => x.name === name), on = state.kind === 'all' || v.kind === state.kind;
-    if (!on) { if (map.hasLayer(mk)) map.removeLayer(mk); return; }
-    const p = pinHtml(v);
-    mk.setIcon(L.divIcon({className: 'pinw', html: p.html, iconSize: [34, 34], iconAnchor: [17, 17]}));
-    mk.setZIndexOffset(p.dim ? 0 : 500 + Math.round((v.avg || 0) * 20));
-    if (!map.hasLayer(mk)) mk.addTo(map);
-    shown.push(mk.getLatLng()); if (!v.closed && ONLINE.includes(v.platform) && countFor(v)) lit.push(mk.getLatLng());
+    mk._inPool = on;
+    if (!on) return;
+    paint(name); if (mk !== solo) add.push(mk);
+    shown.push(mk.getLatLng()); if (isLit(v)) lit.push(mk.getLatLng());
   });
+  cluster.clearLayers(); cluster.addLayers(add);
+  if (solo && !solo._inPool) { map.removeLayer(solo); solo = null; }
   const nLit = lit.length;
   $('#info').textContent = `${nLit} of ${shown.length} with tables online${missing.length ? ` · ${missing.length} not mapped` : ''}`;
   const em = $('#emsg'); em.classList.toggle('hide', nLit > 0);
   em.textContent = `No tables for ${P} ${state.day === 'all' ? 'this week' : 'on ' + dow(state.day) + ' ' + dnum(state.day)}${state.when !== 'any' ? ' in this time range' : ''}`;
   if (fit) {
-    const pts = lit.length >= 2 ? lit : shown;
+    const pts = shown;  // every visible pin, so nothing starts off-screen
     if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(.08), {animate: fitted, maxZoom: 15,
-      paddingTopLeft: [10, 10], paddingBottomRight: [innerWidth >= 860 && $('#sheet').classList.contains('open') ? 420 : 10, 10]});
+      paddingTopLeft: [24, 64], paddingBottomRight: [(innerWidth >= 860 && $('#sheet').classList.contains('open') ? 420 : 0) + 24, innerWidth < 640 ? 70 : 48]});
     fitted = true;
   }
   if (selName) fillSheet(selName, true);
@@ -363,33 +542,50 @@ function fillSheet(name, keepScroll) {
 }
 function openSheet(name) {
   const prev = selName; selName = name;
-  fillSheet(name); sheet.classList.add('open'); sheet.scrollTop = 0;
-  [prev, name].forEach(n => { const mk = markers.get(n); const v = V.find(x => x.name === n); if (mk && v && map.hasLayer(mk)) mk.setIcon(L.divIcon({className: 'pinw', html: pinHtml(v).html, iconSize: [34, 34], iconAnchor: [17, 17]})); });
+  fillSheet(name); sheet.classList.add('open'); sheet.style.transform = ''; sheet.scrollTop = 0;
+  [prev, name].forEach(n => n && paint(n));
   const mk = markers.get(name);
-  if (mk) { // keep the pin visible beside/above the card
-    const pt = map.latLngToContainerPoint(mk.getLatLng()), sz = map.getSize();
-    const desk = innerWidth >= 860, sh = sheet.getBoundingClientRect();
-    const tx = desk ? (sz.x - 420) / 2 : sz.x / 2, ty = desk ? sz.y / 2 : Math.max(60, (sz.y - sh.height) / 2);
-    if (desk ? pt.x > sz.x - 430 : pt.y > sz.y - sh.height - 30) map.panBy([pt.x - tx, pt.y - ty]);
+  if (mk) makeSolo(mk);
+  if (mk) { // glide so the pin sits in the middle of the map area the card leaves free
+    const sz = map.getSize(), desk = innerWidth >= 860, sh = sheet.getBoundingClientRect();
+    const z = Math.max(map.getZoom(), 15);
+    const want = desk ? L.point(40 + (sz.x - 420 - 40) / 2, 30 + (sz.y - 30) / 2) : L.point(sz.x / 2, Math.max(72, 56 + (sz.y - sh.height - 56) / 2 + 6));
+    const c = map.unproject(map.project(mk.getLatLng(), z).add(sz.divideBy(2).subtract(want)), z);
+    const now = map.latLngToContainerPoint(mk.getLatLng());
+    if (z === map.getZoom() && now.distanceTo(want) < 24) return;
+    if (Kit.still()) map.setView(c, z, {animate: false});
+    else if (z === map.getZoom()) map.panTo(c, {animate: true, duration: .45, easeLinearity: .2});
+    else map.flyTo(c, z, {duration: .7, easeLinearity: .25});
   }
 }
 function closeSheet() {
-  sheet.classList.remove('open'); const n = selName; selName = null;
-  const mk = markers.get(n), v = V.find(x => x.name === n);
-  if (mk && v) mk.setIcon(L.divIcon({className: 'pinw', html: pinHtml(v).html, iconSize: [34, 34], iconAnchor: [17, 17]}));
+  sheet.classList.remove('open'); sheet.style.transform = ''; const n = selName; selName = null;
+  if (n) paint(n);
+  unsolo();
 }
 map.on('click', closeSheet);
+
 const zf = () => map.getContainer().classList.toggle('zfar', map.getZoom() <= 12); map.on('zoomend', zf); zf();
 addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
-// swipe the phone sheet down to close
-let y0 = null;
-sheet.addEventListener('touchstart', e => { y0 = sheet.scrollTop <= 0 ? e.touches[0].clientY : null; }, {passive: true});
-sheet.addEventListener('touchend', e => { if (y0 != null && e.changedTouches[0].clientY - y0 > 70 && innerWidth < 860) closeSheet(); y0 = null; }, {passive: true});
+// drag the phone sheet down to close (it follows the finger; let go past ~90px or flick to dismiss)
+let y0 = null, dy = 0, t0 = 0;
+sheet.addEventListener('touchstart', e => { if (innerWidth >= 860) return; y0 = sheet.scrollTop <= 0 ? e.touches[0].clientY : null; dy = 0; t0 = Date.now(); }, {passive: true});
+sheet.addEventListener('touchmove', e => {
+  if (y0 == null) return; dy = e.touches[0].clientY - y0;
+  if (dy <= 0) { sheet.classList.remove('drag'); sheet.style.transform = ''; return; }
+  sheet.classList.add('drag'); sheet.style.transform = `translateY(${dy}px)`;
+}, {passive: true});
+sheet.addEventListener('touchend', () => {
+  if (y0 == null) return; y0 = null; sheet.classList.remove('drag');
+  const fast = dy > 40 && dy / Math.max(1, Date.now() - t0) > .6;
+  if (dy > 90 || fast) closeSheet(); else sheet.style.transform = '';
+}, {passive: true});
 
+document.querySelectorAll('.seg.kind button,.seg.when button').forEach(b => b.classList.add('kit-tap'));
 document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { state.kind = b.dataset.k; if (selName && !(state.kind === 'all' || V.find(v => v.name === selName).kind === state.kind)) closeSheet(); render(); });
-document.querySelectorAll('[data-when]').forEach(b => b.onclick = () => { state.when = b.dataset.when; render(); });
+document.querySelectorAll('[data-when]').forEach(b => b.onclick = () => { state.when = b.dataset.when; render(false); });
 render();
-window.__map = {map, V, state, openSheet, missing};
+window.__map = {map, V, state, openSheet, closeSheet, missing, cluster, markers, get base() { return base; }};
 })();
 </script>
 </body>

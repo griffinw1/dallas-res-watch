@@ -48,13 +48,6 @@
    "src": "osm-address",
    "hood_km": 1.5
   },
-  "Stillwell's": {
-   "lat": 32.792303,
-   "lng": -96.806269,
-   "src": "osm-address",
-   "hood_km": 0.8,
-   "approx": true
-  },
   "El Carlos Elegante": {
    "lat": 32.790216,
    "lng": -96.820006,
@@ -144,13 +137,6 @@
    "src": "resy",
    "hood_km": 0.2
   },
-  "Tatsu Dallas": {
-   "lat": 32.786451,
-   "lng": -96.776758,
-   "src": "osm-address",
-   "hood_km": 1.5,
-   "approx": true
-  },
   "Sushi by Scratch Restaurants: Dallas": {
    "lat": 32.779937,
    "lng": -96.800204,
@@ -204,13 +190,6 @@
    "lng": -96.773437,
    "src": "resy",
    "hood_km": 0.2
-  },
-  "Purepecha and Revolver Taco Lounge": {
-   "lat": 32.784048,
-   "lng": -96.784138,
-   "src": "osm-address",
-   "hood_km": 2.0,
-   "approx": true
   },
   "Tango Room": {
    "lat": 32.795425,
@@ -307,13 +286,6 @@
    "src": "osm-address",
    "hood_km": 1.1
   },
-  "Apothecary": {
-   "lat": 32.813507,
-   "lng": -96.770105,
-   "src": "osm-address",
-   "hood_km": 0.0,
-   "approx": true
-  },
   "Katy Trail Ice House": {
    "lat": 32.800808,
    "lng": -96.80753,
@@ -337,9 +309,37 @@
    "lng": -96.794227,
    "src": "osm-address",
    "hood_km": 2.1
+  },
+  "Stillwell's": {
+   "lat": 32.792362,
+   "lng": -96.80602,
+   "src": "osm-address",
+   "hood_km": 0.8
+  },
+  "Nuri Steakhouse": {
+   "lat": 32.796431,
+   "lng": -96.805242,
+   "src": "osm-address",
+   "hood_km": 0.4
+  },
+  "Tatsu Dallas": {
+   "lat": 32.786451,
+   "lng": -96.776758,
+   "src": "osm-address",
+   "hood_km": 1.5
+  },
+  "Purepecha and Revolver Taco Lounge": {
+   "lat": 32.784048,
+   "lng": -96.784138,
+   "src": "osm-address",
+   "hood_km": 2.0
+  },
+  "Apothecary": {
+   "lat": 32.813507,
+   "lng": -96.770105,
+   "src": "osm-address",
+   "hood_km": 0.0
   }
  },
- "missing": [
-  "Nuri Steakhouse"
- ]
+ "missing": []
 }
