@@ -80,11 +80,11 @@ Owner: the "Dallas trip rough plan" session. Live at https://griffinw1.github.io
 
 ### 2.3 Plan structure
 - ✅ Week at a glance + a section per day with morning / afternoon / evening slots, each marked **Booked / Planned / Idea / Open**.
-- ✅ Possible **lakehouse** stretch for a few days (dates ❓), shown as a tentative block.
+- ✅ Possible **lakehouse** stretch: **Sat Nov 21 – Sun Nov 22**, tentative (Idea), Griffin, Lance, Saket. No location on the page. Dallas plans + dinner ideas for those days shown muted under "If the lakehouse falls through".
 - ✅ Dinner ideas for open evenings pulled from Part 1's live data (`../results.json`, fetched on load): 3 places with tables for 4 that night, preferring a 6:00–8:30 slot, then Beli Top-25 rank. Notes that groups bigger than 4 should call.
   - ⏳ "Linking to the grid for that day": trip links to `../site/#d=YYYY-MM-DD`, but the grid doesn't read the hash yet, so it opens the full grid. Needs Part 1 to support `#d=`.
   - ⏳ Ranking uses Beli Top-25 rank because `results.json` has `beli_avg` for only 1 venue; will switch to averages once Part 1 writes them into `results.json`.
-- ✅ "Open questions" list: where everyone stays, who joins when, Thanksgiving plans, lakehouse dates.
+- ✅ "Open questions" list: where everyone stays, who joins when, Thanksgiving plans, lakehouse yes/no.
 
 ### 2.4 Acceptance
 - ✅ Readable on a phone in one scroll per day; booked items stand out (green Booked pill); links to `../site/` work. Checked at 375px light/dark, no sideways scroll.
@@ -92,7 +92,7 @@ Owner: the "Dallas trip rough plan" session. Live at https://griffinw1.github.io
 ---
 
 ## Open questions for Griffin
-1. Lakehouse: which days, and who's going?
+1. Lakehouse Sat Nov 21 – Sun Nov 22 (Griffin, Lance, Saket): yes or no?
 2. Thanksgiving dinner (Griffin cooking): who's coming, and 6 or 7 PM?
 3. Any other friends joining, and for which nights?
 4. When can the Mac sit untouched for ~1 h (Beli scores)?

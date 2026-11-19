@@ -84,11 +84,13 @@ h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:34px
 .slot .when{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;padding-top:3px}
 .slot .what{display:flex;flex-direction:column;gap:14px;min-width:0}
 .item{display:flex;flex-direction:column;gap:6px;min-width:0}
+.alt{opacity:.72;border-top:1px solid var(--line);padding:14px 0 6px;display:flex;flex-direction:column;gap:14px}
+.alt-hd{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
 .item+.item{padding-top:12px;border-top:1px dashed var(--line)}
 .lake{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 14px;margin-top:8px;font-size:14px;color:var(--soft)}
-.slot .line{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.slot .title{font-weight:600}
-.slot p{margin:0;color:var(--soft);font-size:14px}
+.item .line{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.item .title{font-weight:600}
+.item p{margin:0;color:var(--soft);font-size:14px}
 .who{display:flex;flex-wrap:wrap;gap:5px}
 @media (max-width:520px){.slot{grid-template-columns:1fr;gap:6px}}
 /* dinner ideas */
@@ -141,13 +143,13 @@ footer{margin-top:36px;font-size:13px;color:var(--muted)}
 
   <h2>Week at a glance</h2>
   <div class="glance" id="glance" role="tablist" aria-label="Days"></div>
-  <div class="card lake"><span class="pill idea">Idea</span><strong>Lakehouse for a few days</strong><span>Dates and who's going TBD; it'll take over whichever days it lands on.</span></div>
+  <div class="card lake"><span class="pill idea">Idea</span><strong>Lakehouse, Sat Nov 21 – Sun Nov 22</strong><span>Tentative. Griffin, Lance and Saket. Dallas plans for those days are kept below as a fallback.</span></div>
   <div class="card day" id="day" role="tabpanel"></div>
 
   <h2>Open questions</h2>
   <div class="card">
     <ol class="qs">
-      <li>Lakehouse: which days, and who's going?</li>
+      <li>Lakehouse Sat Nov 21 – Sun Nov 22 (Griffin, Lance, Saket): yes or no?</li>
       <li>Wed night: which bar for ~5 PM pre-drinks, and is Vice Park the club? Need a table or tickets?</li>
       <li>Where is everyone staying (neighborhood is enough), and does that change mid-week?</li>
       <li>Who else is joining (friends, family), and which days? Stella, Saket's sister, Griffin's parents and Saket's mom are in for Tue dinner; Stella and Saket's sister for Wed.</li>
@@ -173,14 +175,21 @@ const DAYS=[
    morning:{s:"open",t:"Travel",n:"Flights and arrival times TBD."},
    afternoon:{s:"idea",t:"Settle in, Katy Trail walk",n:"Easy first afternoon near wherever we're staying.",who:[...CORE]},
    evening:{s:"idea",t:"First-night dinner",who:[...CORE,"?"],dinner:true}}},
- {d:"2026-11-21",title:"Saturday",slots:{
-   morning:{s:"open"},
-   afternoon:{s:"idea",t:"Bishop Arts wander",n:"Shops, coffee, early bite in Oak Cliff.",who:[...CORE,"?"]},
-   evening:{s:"idea",t:"Big Saturday dinner + drinks after",n:"Bar ideas: Bar Colette, Apothecary.",who:[...CORE,"?"],dinner:true}}},
- {d:"2026-11-22",title:"Sunday",slots:{
-   morning:{s:"idea",t:"Brunch",who:[...CORE,"?"]},
-   afternoon:{s:"idea",t:"Watch football somewhere fun",n:"Sports bar or a friend's place.",who:[...CORE,"?"]},
-   evening:{s:"open",dinner:true}}},
+ {d:"2026-11-21",title:"Lakehouse (tentative)",tag:"Lake?",slots:{
+   morning:{s:"idea",t:"Head out to the lakehouse",n:"Tentative, not confirmed.",who:["Griffin","Lance","Saket"]},
+   afternoon:{s:"idea",t:"Lake day",who:["Griffin","Lance","Saket"]},
+   evening:{s:"idea",t:"Dinner at the lakehouse",who:["Griffin","Lance","Saket"]}},
+  alt:[
+   {s:"idea",t:"Afternoon: Bishop Arts wander",n:"Shops, coffee, early bite in Oak Cliff.",who:[...CORE,"?"]},
+   {s:"idea",t:"Evening: big Saturday dinner + drinks after",n:"Bar ideas: Bar Colette, Apothecary.",who:[...CORE,"?"],dinner:true}]},
+ {d:"2026-11-22",title:"Lakehouse (tentative)",tag:"Lake?",slots:{
+   morning:{s:"idea",t:"Slow lake morning",who:["Griffin","Lance","Saket"]},
+   afternoon:{s:"idea",t:"Drive back to Dallas",n:"Or stay later; open.",who:["Griffin","Lance","Saket"]},
+   evening:{s:"open",t:"Back in Dallas? Easy night",who:["Griffin","Lance","Saket"]}},
+  alt:[
+   {s:"idea",t:"Morning: brunch",who:[...CORE,"?"]},
+   {s:"idea",t:"Afternoon: watch football somewhere fun",n:"Sports bar or a friend's place.",who:[...CORE,"?"]},
+   {s:"open",t:"Evening: dinner",dinner:true}]},
  {d:"2026-11-23",title:"Monday",slots:{
    morning:{s:"open"},
    afternoon:{s:"idea",t:"Dallas Arboretum",n:"Holiday displays are usually up by late Nov.",who:["?"]},
@@ -270,7 +279,8 @@ function renderDay(){
   const x=DAYS.find(y=>y.d===cur);
   const long=dt(x.d).toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"});
   $("#day").innerHTML=`<h3>${esc(x.title)}</h3><div class="sub">${long}</div>`+
-    ["morning","afternoon","evening"].map(k=>`<div class="slot"><div class="when">${k}</div><div class="what">${items(x.slots[k]).map(s=>itemHTML(s,x.d)).join("")}</div></div>`).join("");
+    ["morning","afternoon","evening"].map(k=>`<div class="slot"><div class="when">${k}</div><div class="what">${items(x.slots[k]).map(s=>itemHTML(s,x.d)).join("")}</div></div>`).join("")+
+    (x.alt?`<div class="alt"><div class="alt-hd">If the lakehouse falls through</div>${x.alt.map(s=>itemHTML(s,x.d)).join("")}</div>`:"");
 }
 
 function pick(d,push){cur=d;renderGlance();renderDay();if(push)history.replaceState(null,"","#"+d)}
