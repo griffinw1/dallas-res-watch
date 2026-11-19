@@ -70,6 +70,51 @@ h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:34px
 .chip.opt{text-decoration:none;border:1px solid var(--line);background:var(--card);color:var(--accent);white-space:normal}
 .dinner .vibe{font-style:italic}
 @media (max-width:560px){.dinner li{flex-direction:column;gap:2px}.dinner li .times{text-align:left;white-space:normal}}
+.pan{padding:14px;display:flex;flex-direction:column;gap:12px}
+.pan-intro{margin:0;color:var(--soft);font-size:14px}
+.pan-nights,.pan-party{position:relative;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.pan-nights::-webkit-scrollbar{display:none}
+.pan-nights button,.pan-party button{position:relative;z-index:1;flex:none;border:1px solid var(--line);background:var(--card);color:var(--soft);border-radius:999px;padding:6px 11px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.pan-nights button.on,.pan-party button.on{border-color:transparent;color:var(--chip-core-ink);background:var(--chip-core)}
+.pan-nights.kit-on button.on,.pan-party.kit-on button.on{background:transparent;border-color:transparent}
+.pan-nights .kit-ind,.pan-party .kit-ind{background:var(--chip-core);border-radius:999px;box-shadow:0 2px 8px -2px rgba(0,0,0,.25)}
+.pan-nights i{font-style:normal;color:var(--decided);font-size:9px;margin-left:3px;vertical-align:2px}
+.pan-nights button.on i{color:inherit}
+.pan-ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.pan-ctl label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;min-width:0}
+.pan-ctl label:first-child{flex:1 1 220px}
+.pan-ctl select{font:inherit;font-size:14px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;max-width:100%;min-width:0}
+.pan-pw{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.pan-note{font-size:13px;color:var(--idea);background:var(--idea-bg);border-radius:10px;padding:7px 10px}
+.pan-note.soft{color:var(--muted);background:transparent;padding:0 2px}
+#panNote{display:flex;flex-direction:column;gap:6px}
+#panNote:empty{display:none}
+.tl{list-style:none;margin:0;padding:0 0 0 18px;position:relative}
+.tl::before{content:"";position:absolute;left:5px;top:10px;bottom:14px;width:2px;background:var(--line);border-radius:2px}
+.tl-i{position:relative;padding:4px 0 16px}
+.tl-i::before{content:"";position:absolute;left:-18px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid var(--idea)}
+.tl-i.main::before{border-color:var(--decided);background:var(--decided)}
+.tl-h{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.tl-h b{font-family:Fraunces,Georgia,serif;font-size:17px;font-weight:600}
+.tl-h span{color:var(--muted);font-size:13px}
+.pan-sw{margin-left:auto;border:1px solid var(--line);background:var(--card);color:var(--accent);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.pan-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pan-v{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.pan-v>div{min-width:0;display:flex;flex-direction:column;gap:2px}
+.pan-th{flex:none;width:46px;height:46px;border-radius:10px;object-fit:cover;background:var(--chip)}
+.pan-th.ph{display:grid;place-items:center;color:var(--muted);font-weight:600}
+.pan-nm{font-weight:600;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pan-nm a{color:var(--accent)}
+.pan .meta{color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:4px}
+.pan .meta.vibe{font-style:italic}
+.pan-tag{border:1px solid var(--line);border-radius:999px;padding:0 7px;font-size:11.5px}
+.pan-tag.warn{color:var(--idea);border-color:var(--idea-bg);background:var(--idea-bg)}
+.pan-times{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.pan-t{font-size:12.5px;font-weight:600;text-decoration:none;color:var(--decided);background:var(--decided-bg);border-radius:8px;padding:3px 8px}
+.pan-t.on{outline:2px solid var(--decided);outline-offset:1px}
+.pan-act{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:12.5px;color:var(--muted)}
+#panAdd{border:0;background:var(--accent);color:#fff;border-radius:999px;padding:9px 18px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.pan-rm{align-self:flex-start;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:2px 10px;font:inherit;font-size:12px;cursor:pointer}
 .chip{display:inline-flex;align-items:center;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:500;background:var(--chip);color:var(--ink);white-space:nowrap}
 .chip.core{background:var(--chip-core);color:var(--chip-core-ink)}
 .chip.tbd{background:transparent;border:1px dashed var(--muted);color:var(--muted)}
@@ -243,6 +288,20 @@ html.kit-lock{overflow:hidden}
   <div class="glance" id="glance" role="tablist" aria-label="Days"></div>
   <div class="card lake"><span class="pill idea">Idea</span><strong>Lakehouse, Sat Nov 21 – Sun Nov 22</strong><span>Tentative. Griffin, Lance and Saket. Dallas plans for those days are kept below as a fallback.</span></div>
   <div class="card day" id="day" role="tabpanel"></div>
+
+  <h2>Plan a night</h2>
+  <div class="card pan" id="pan">
+    <p class="pan-intro">Pick a night and a dinner; it suggests drinks before and somewhere to go after, close by. Read-only: nothing gets booked or held.</p>
+    <div class="pan-nights" id="panNights" role="group" aria-label="Night"></div>
+    <div class="pan-ctl">
+      <label>Dinner<select id="panDinner"></select></label>
+      <label>Time<select id="panTime"></select></label>
+      <div class="pan-pw"><span>Party</span><div class="pan-party" id="panParty" role="group" aria-label="Party size"></div></div>
+    </div>
+    <div id="panNote"></div>
+    <ol class="tl" id="panTl"></ol>
+    <div class="pan-act"><button type="button" id="panAdd" class="kit-tap">Add to plan</button><span>Adds it as an Idea on that day, on this device only.</span></div>
+  </div>
 
   <h2>Open questions</h2>
   <div class="card">
@@ -523,11 +582,14 @@ function dinnerBlock(d){
 
 const items=s=>Array.isArray(s)?s:[s];
 const topStatus=s=>{const st=items(s).map(i=>i.s);return st.includes("decided")?"decided":st.includes("planned")?"planned":st.includes("idea")?"idea":"open"};
+const SAVED_KEY="drwTripAdds";
+function savedFor(d){try{return (JSON.parse(localStorage.getItem(SAVED_KEY)||"{}")[d]||[]).map((x,i)=>({s:"idea",t:x.t,n:x.n,rm:i}))}catch(e){return []}}
 function itemHTML(s,d){return `<div class="item">
       <div class="line"><span class="pill ${s.s}">${LABEL[s.s]}</span><span class="title">${s.link?`<a href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.t)}</a>`:esc(s.t||(s.s==="open"?"Nothing yet":""))}</span></div>
       ${s.n?`<p>${esc(s.n)}</p>`:""}
       ${s.opts?`<div class="opts">${s.opts.map(o=>`<a class="chip opt" href="${esc(o.href)}" target="_blank" rel="noopener">${esc(o.t)}</a>`).join("")}</div>`:""}
       ${s.who?`<div class="who">${chips(s.who)}</div>`:""}
+      ${s.rm!=null?`<button type="button" class="pan-rm kit-tap" data-rm="${d}|${s.rm}">Remove</button>`:""}
       ${s.dinner?dinnerBlock(d):""}</div>`}
 function renderGlance(){
   $("#glance").innerHTML=DAYS.map(x=>`<button class="g${x.d===cur?" on":""}" role="tab" aria-selected="${x.d===cur}" data-d="${x.d}">
@@ -540,12 +602,14 @@ function renderDay(){
   const x=DAYS.find(y=>y.d===cur);
   const long=dt(x.d).toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"});
   $("#day").innerHTML=`<h3>${esc(x.title)}</h3><div class="sub">${long}</div>`+
-    ["morning","afternoon","evening"].map(k=>`<div class="slot"><div class="when">${k}</div><div class="what">${items(x.slots[k]).map(s=>itemHTML(s,x.d)).join("")}</div></div>`).join("")+
+    ["morning","afternoon","evening"].map(k=>`<div class="slot"><div class="when">${k}</div><div class="what">${(k==="evening"?[...items(x.slots[k]),...savedFor(x.d)]:items(x.slots[k])).map(s=>itemHTML(s,x.d)).join("")}</div></div>`).join("")+
     (x.alt?`<div class="alt"><div class="alt-hd">If the lakehouse falls through</div>${x.alt.map(s=>itemHTML(s,x.d)).join("")}</div>`:"");
 }
 
 function pick(d,push){cur=d;renderGlance();renderDay();Kit.slide($("#glance"));Kit.reveal($("#day").children);if(push)history.replaceState(null,"","#"+d)}
 
+$("#day").addEventListener("click",e=>{const b=e.target.closest("[data-rm]");if(!b)return;const [d,i]=b.dataset.rm.split("|");
+  try{const all=JSON.parse(localStorage.getItem(SAVED_KEY)||"{}");(all[d]||[]).splice(+i,1);if(!(all[d]||[]).length)delete all[d];localStorage.setItem(SAVED_KEY,JSON.stringify(all))}catch(e){}renderDay()});
 $("#glance").addEventListener("click",e=>{const b=e.target.closest("[data-d]");if(b)pick(b.dataset.d,true)});
 
 // start on the hash day, today if during the trip, else day 1
@@ -553,11 +617,11 @@ const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"});
 const h=location.hash.slice(1);
 pick(DAYS.some(x=>x.d===h)?h:DAYS.some(x=>x.d===today)?today:DAYS[0].d,false);
 
-let VIBES={};fetch("../vibes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>{VIBES=j||{};if(DATA)renderDay()}).catch(()=>{});
+var VIBES={};fetch("../vibes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>{VIBES=j||{};if(DATA)renderDay()}).catch(()=>{});
 fetch("../results.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()})
   .then(j=>{DATA=j;renderDay()}).catch(()=>{DATA_ERR=true;renderDay()});
 
-Kit.buzzOn(".g, .theme, .dinner a");
+Kit.buzzOn(".g, .theme, .dinner a, .pan button, .pan-t");
 
 // theme toggle (per-viewer, optional)
 const root=document.documentElement;
@@ -567,6 +631,176 @@ $("#theme").addEventListener("click",()=>{
   root.dataset.theme=dark?"light":"dark";
   try{localStorage.setItem("trip-theme",root.dataset.theme)}catch(e){}
 });
+</script>
+<script>
+// ---------- Plan a night (read-only; "Add to plan" saves to this device only) ----------
+(() => {
+const PARTIES=[2,4,6,8];
+const BOOKED={ // the two real reservations
+  "2026-11-24":{name:"Casa Brasa",time:"7:30 PM",party:8,dur:120,note:"Booked for 8.",after:[{name:"Kamilla",why:"Casa Brasa's speakeasy lounge, same spot",km:0}]},
+  "2026-11-25":{name:"Tatsu Dallas",label:"Tatsu",hood:"Deep Ellum",pre:"5:00 PM",time:"7:45 PM",party:4,dur:105,note:"Booked for 4, prepaid. Arrive ~7:30.",after:[{name:"Vice Park",why:"The planned club (Lance meets up here)",km:null}]},
+};
+const BEFORE_TAGS={"Pre-game spot":2,"Cocktails":1,"Lively":1};
+const AFTER_TAGS={"Late night":2,"Dancing":2,"Lively":1,"Cocktails":1};
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const cache={}; let GEO={}, MEDIA={}, V=()=>window.VIBES||{};
+const st={d:null,dinner:null,time:null,party:null,partyAuto:true,swap:{before:0,after:0}};
+
+const fmt=m=>{m=((m%1440)+1440)%1440;let h=Math.floor(m/60),mm=m%60,ap=h>=12?"PM":"AM";h=h%12||12;return `${h}:${String(mm).padStart(2,"0")} ${ap}`};
+const h24=t=>{const m=mins(t);return m==null?null:`${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`};
+const km=(a,b)=>{if(!a||!b)return null;const R=6371,r=x=>x*Math.PI/180,dl=r(b.lat-a.lat),dg=r(b.lng-a.lng);
+  const h=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+const away=k=>k==null?"":k<0.05?"same spot":k<1?`~${Math.max(2,Math.round(k*12))}-min walk`:`~${Math.max(4,Math.round(k*3))} min drive`;
+const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+
+function bookUrl(v,d,t,P){const u=v.url;if(!u)return null;const hm=t?h24(t):null;
+  try{switch(v.platform){
+    case"resy":{const x=new URL(u);x.searchParams.set("date",d);x.searchParams.set("seats",P);return x+""}
+    case"opentable":{if(!v.id)return u;const x=new URL("https://www.opentable.com/restaurant/profile/"+v.id);x.searchParams.set("covers",P);x.searchParams.set("dateTime",d+"T"+(hm||"19:00"));return x+""}
+    case"sevenrooms":{const x=new URL(u);x.searchParams.set("date",d);x.searchParams.set("party_size",P);if(hm)x.searchParams.set("start_time",hm);return x+""}
+    case"tock":{const x=new URL(u.replace(/\/$/,"")+"/search");x.searchParams.set("date",d);x.searchParams.set("size",P);if(hm)x.searchParams.set("time",hm);return x+""}
+    default:return u}}catch(e){return u}}
+
+// hours hints from vibes.json heads_up
+function hours(name,d){
+  const h=(V()[name]||{}).heads_up||"";const r={ok:true,opens:null,note:""};
+  if(/couldn.t verify/i.test(h))r.ok=false;
+  const rng=/open\s+(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s*-\s*(Sun|Mon|Tue|Wed|Thu|Fri|Sat)/i.exec(h);
+  const wd=dt(d).getDay();
+  if(rng){const a=DOW.indexOf(rng[1].slice(0,1).toUpperCase()+rng[1].slice(1,3).toLowerCase()),b=DOW.indexOf(rng[2].slice(0,1).toUpperCase()+rng[2].slice(1,3).toLowerCase());
+    const inR=a<=b?wd>=a&&wd<=b:wd>=a||wd<=b;if(!inR){r.ok=false;r.note=`Closed ${DOW[wd]}`}}
+  const o=/opens?\b[^.;]*?~?(\d{1,2})(?::(\d\d))?\s*PM/i.exec(h);if(o)r.opens=(+o[1]%12+12)*60+(+(o[2]||0));
+  if(/ticketed/i.test(h)){r.note="Ticketed events only";if(![5,6].includes(wd))r.ok=false}
+  if(d==="2026-11-26"&&!r.note)r.note="Holiday hours may differ";
+  return r;
+}
+
+function whoCount(d){
+  const x=DAYS.find(y=>y.d===d);if(!x)return null;
+  const ev=items(x.slots.evening);const it=ev.find(i=>i.s==="decided")||ev.find(i=>i.dinner)||(x.alt||[]).find(i=>i.dinner)||ev.find(i=>i.who);
+  if(!it||!it.who)return null;
+  return it.who.reduce((n,w)=>n+(w==="?"?0:/parents/.test(w)?2:1),0)||null;
+}
+const roundParty=c=>PARTIES.find(n=>n>=c)||8;
+
+function load(P){
+  if(cache[P])return cache[P];
+  const url=P===4?"../results.json":`../results_p${P}.json`;
+  return cache[P]=fetch(url,{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>({data:j,P,fallback:false}))
+    .catch(()=>P===4?{data:null,P:4,fallback:false}:load(4).then(x=>({...x,fallback:true,wanted:P})));
+}
+
+function defaultNight(){
+  const todayS=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"});
+  const ok=x=>x.d>=todayS&&items(x.slots.evening).some(i=>i.dinner);
+  return (DAYS.find(ok)||DAYS.find(x=>BOOKED[x.d])||DAYS[0]).d;
+}
+
+let LOADED=null;
+async function render(){
+  const box=$("#pan");if(!box)return;
+  const P=st.party;const L=LOADED=await load(P);if(L!==LOADED)return;
+  const data=L.data;const d=st.d;const bk=BOOKED[d];
+  const venues=data?data.venues:[];
+  const byName=Object.fromEntries(venues.map(v=>[v.name,v]));
+  // dinner options
+  const opts=[];
+  if(bk)opts.push({key:"booked",name:bk.name,label:`${bk.label||bk.name} · booked ${bk.time}`});
+  venues.filter(v=>v.kind==="restaurant"&&(v.slots?.[d]||[]).length&&v.name!==bk?.name)
+    .sort((a,b)=>{const pr=v=>v.slots[d].some(t=>{const m=mins(t);return m>=18*60&&m<=20*60+30});return (pr(b)-pr(a))||(a.beli_rank??99)-(b.beli_rank??99)||a.name.localeCompare(b.name)})
+    .forEach(v=>opts.push({key:v.name,name:v.name,label:`${v.name}${v.beli_rank?` · Beli #${v.beli_rank}`:""} · ${v.slots[d].length} times`}));
+  if(!opts.some(o=>o.key===st.dinner))st.dinner=opts[0]?.key||null;
+  const o=opts.find(x=>x.key===st.dinner);
+  const v=o?(byName[o.name]||{name:o.name}):null;
+  const slots=o&&o.key!=="booked"?(v.slots?.[d]||[]):[];
+  if(o&&o.key==="booked")st.time=bk.time;
+  else if(!slots.includes(st.time)){st.time=slots.find(t=>{const m=mins(t);return m>=18*60+30&&m<=20*60})||slots.find(t=>{const m=mins(t);return m>=18*60&&m<=20*60+30})||slots[0]||null}
+  const dm=mins(st.time||"7:30 PM"), dur=o?.key==="booked"?bk.dur:120;
+  const here=v?GEO[v.name]:null;
+
+  // bars ranked by distance + tag fit
+  const bars=venues.filter(b=>b.kind==="bar");
+  const rank=(tags,when,isBefore)=>bars.map(b=>{
+      const hr=hours(b.name,d);if(!hr.ok)return null;
+      const g=GEO[b.name];const k=km(here,g);
+      const vb=V()[b.name]||{};const fit=(vb.tags||[]).reduce((n,t)=>n+(tags[t]||0),0);
+      let late=0;if(isBefore&&hr.opens!=null&&hr.opens>when+15)late=1;
+      const score=(k==null?12:k)-fit*1.2+late*20;
+      return {b,k,vb,hr,fit,late,score,tags:(vb.tags||[]).filter(t=>tags[t]).slice(0,2)};
+    }).filter(Boolean).sort((a,b)=>a.score-b.score);
+  const preM=bk?.pre&&o?.key==="booked"?mins(bk.pre):dm-90;
+  const before=rank(BEFORE_TAGS,preM,true);
+  const pickN=(arr,off,n)=>arr.length?Array.from({length:Math.min(n,arr.length)},(_,i)=>arr[(off+i)%arr.length]):[];
+  const showB=pickN(before,st.swap.before,2);const after=rank(AFTER_TAGS,dm+dur,false).filter(r=>!showB.includes(r.b.name)&&!showB.some(x=>x.b===r.b));const showA=pickN(after,st.swap.after,2);
+  st._plan={d,dinner:v?.name,label:o?.label,time:st.time,before:showB[0]?.b.name,after:(bk?.after?.[0]?.name)||showA[0]?.b.name};
+
+  const thumb=n=>{const im=(MEDIA[n]?.images||[])[0];return im?`<img class="pan-th" src="${esc(im)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:`<span class="pan-th ph" aria-hidden="true">${esc((n||"?")[0])}</span>`};
+  const site=n=>MEDIA[n]?.website;
+  const barRow=(r,when)=>`<li class="pan-v">${thumb(r.b.name)}<div><div class="pan-nm">${site(r.b.name)?`<a href="${esc(site(r.b.name))}" target="_blank" rel="noopener">${esc(r.b.name)}</a>`:esc(r.b.name)}</div>
+      <div class="meta">${esc([r.b.hood,away(r.k),r.vb.energy,r.vb.price].filter(Boolean).join(" · "))}</div>
+      <div class="meta">${r.tags.map(t=>`<span class="pan-tag">${esc(t)}</span>`).join("")}${r.hr.opens!=null?`<span class="pan-tag ${r.late?"warn":""}">opens ${esc(fmt(r.hr.opens))}</span>`:""}${r.hr.note?`<span class="pan-tag warn">${esc(r.hr.note)}</span>`:""}</div></div></li>`;
+  const pinRow=p=>`<li class="pan-v"><span class="pan-th ph" aria-hidden="true">★</span><div><div class="pan-nm">${esc(p.name)} <span class="pill planned">Planned</span></div><div class="meta">${esc([p.why,p.km===0?"same spot":p.km==null?"no map pin yet":away(p.km)].filter(Boolean).join(" · "))}</div></div></li>`;
+  const vb=v?(V()[v.name]||{}):{};const hood=(o?.key==="booked"&&bk.hood)||v?.hood;
+
+  const note=L.fallback?`<div class="pan-note">No openings file for ${L.wanted} yet, so these are tables for 4. Call for bigger groups.</div>`
+    :!data?`<div class="pan-note">Couldn't load openings right now.</div>`:P>4?`<div class="pan-note">Showing tables for ${P}. Big groups often still need a call.</div>`:"";
+
+  $("#panNights").innerHTML=DAYS.map(x=>`<button type="button" class="pan-n kit-tap${x.d===d?" on":""}" data-d="${x.d}" aria-pressed="${x.d===d}">${dow(x.d)} ${dnum(x.d)}${BOOKED[x.d]?"<i>●</i>":""}</button>`).join("");
+  $("#panDinner").innerHTML=opts.length?opts.map(x=>`<option value="${esc(x.key)}"${x.key===st.dinner?" selected":""}>${esc(x.label)}</option>`).join(""):`<option>No openings found</option>`;
+  $("#panTime").innerHTML=o?.key==="booked"?`<option>${esc(bk.time)} (booked)</option>`:slots.map(t=>`<option${t===st.time?" selected":""}>${esc(t)}</option>`).join("")||"<option>—</option>";
+  $("#panTime").disabled=o?.key==="booked"||!slots.length;
+  $("#panParty").innerHTML=PARTIES.map(n=>`<button type="button" class="kit-tap${n===P?" on":""}" data-p="${n}" aria-pressed="${n===P}">${n}</button>`).join("");
+  $("#panNote").innerHTML=note+(st.partyAuto&&whoCount(d)?`<div class="pan-note soft">Party set from who's on that night's plan (${whoCount(d)}).</div>`:"");
+
+  const dinnerHTML=!v?`<p class="meta">Pick a dinner above.</p>`:`<div class="pan-v">${thumb(v.name)}<div>
+      <div class="pan-nm">${v.url?`<a href="${esc(o.key==="booked"?(site(v.name)||v.url):bookUrl(v,d,null,P))}" target="_blank" rel="noopener">${esc(o.key==="booked"?(bk.label||v.name):v.name)}</a>`:esc(v.name)} ${o.key==="booked"?`<span class="pill decided">Booked</span>`:""}</div>
+      <div class="meta">${esc([hood,vb.energy,vb.price].filter(Boolean).join(" · "))}</div>
+      ${vb.food?`<div class="meta vibe">${esc(vb.food)}</div>`:""}
+      ${vb.dress?`<div class="meta">Dress: ${esc(vb.dress)}</div>`:""}
+      ${o.key==="booked"?`<div class="meta">${esc(bk.note)}</div>`:`<div class="pan-times">${slots.map(t=>`<a class="pan-t${t===st.time?" on":""}" href="${esc(bookUrl(v,d,t,P))}" target="_blank" rel="noopener" title="Opens ${esc(v.platform||"")} for ${P}">${esc(t.replace(" PM",""))}</a>`).join("")}</div><div class="meta">Times open the booking page for ${P}; nothing is held.</div>`}
+    </div></div>`;
+
+  $("#panTl").innerHTML=`
+    <li class="tl-i"><div class="tl-h"><b>Before</b><span>~${esc(fmt(preM))}</span>${before.length>2?`<button type="button" class="pan-sw kit-tap" data-sw="before">Swap ↻</button>`:""}</div>
+      <ul class="pan-l">${showB.map(r=>barRow(r,preM)).join("")||`<li class="meta">No bar data near here.</li>`}</ul></li>
+    <li class="tl-i main"><div class="tl-h"><b>Dinner</b><span>${esc(st.time||"")}</span></div>${dinnerHTML}</li>
+    <li class="tl-i"><div class="tl-h"><b>After</b><span>~${esc(fmt(dm+dur))}</span>${after.length>2?`<button type="button" class="pan-sw kit-tap" data-sw="after">Swap ↻</button>`:""}</div>
+      <ul class="pan-l">${(bk?.after||[]).map(pinRow).join("")}${showA.map(r=>barRow(r,dm+dur)).join("")}</ul></li>`;
+  Kit.slide($("#panNights"));Kit.slide($("#panParty"));
+}
+
+function setNight(d){st.d=d;st.swap={before:0,after:0};st.dinner=BOOKED[d]?"booked":null;st.time=null;
+  const c=whoCount(d);if(c){st.party=roundParty(c);st.partyAuto=true}else{st.party=+lsGet("drwParty",4)||4;st.partyAuto=false}
+  render()}
+
+function init(){
+  const host=$("#pan");if(!host)return;
+  host.addEventListener("click",e=>{
+    const n=e.target.closest("[data-d]");if(n&&n.closest("#panNights")){setNight(n.dataset.d);return}
+    const p=e.target.closest("[data-p]");if(p){st.party=+p.dataset.p;st.partyAuto=false;lsSet("drwParty",p.dataset.p);render();return}
+    const s=e.target.closest("[data-sw]");if(s){st.swap[s.dataset.sw]++;render();return}
+  });
+  $("#panDinner").addEventListener("change",e=>{st.dinner=e.target.value;st.time=null;st.swap={before:0,after:0};render()});
+  $("#panTime").addEventListener("change",e=>{st.time=e.target.value;render()});
+  $("#panAdd").addEventListener("click",()=>{
+    const p=st._plan;if(!p||!p.dinner)return;
+    const all=JSON.parse(lsGet("drwTripAdds","{}")||"{}");(all[p.d]=all[p.d]||[]).push({
+      t:`Night plan: ${[p.before&&`drinks at ${p.before}`,`${p.dinner.replace(" Dallas","")} ${p.time||""}`.trim(),p.after&&`then ${p.after}`].filter(Boolean).join(" → ")}`,
+      n:`Party of ${st.party}. Saved on this device only; nothing is booked.`});
+    lsSet("drwTripAdds",JSON.stringify(all));
+    const b=$("#panAdd");b.textContent="Added ✓";setTimeout(()=>b.textContent="Add to plan",1600);
+    if(typeof pick==="function")pick(p.d,true);
+  });
+  Promise.all([
+    fetch("../map/geo.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>GEO=j.venues||{}).catch(()=>{}),
+    fetch("../media.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>MEDIA=j||{}).catch(()=>{}),
+    fetch("../vibes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>{if(!Object.keys(window.VIBES||{}).length)window.VIBES=j||{}}).catch(()=>{}),
+  ]).then(render);
+  setNight(defaultNight());
+}
+init();
+})();
 </script>
 </body>
 </html>
