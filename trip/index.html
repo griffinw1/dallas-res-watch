@@ -78,7 +78,10 @@ h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:34px
 .slot{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
 .slot:first-of-type{border-top:0}
 .slot .when{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;padding-top:3px}
-.slot .what{display:flex;flex-direction:column;gap:6px;min-width:0}
+.slot .what{display:flex;flex-direction:column;gap:14px;min-width:0}
+.item{display:flex;flex-direction:column;gap:6px;min-width:0}
+.item+.item{padding-top:12px;border-top:1px dashed var(--line)}
+.lake{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 14px;margin-top:8px;font-size:14px;color:var(--soft)}
 .slot .line{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .slot .title{font-weight:600}
 .slot p{margin:0;color:var(--soft);font-size:14px}
@@ -123,24 +126,31 @@ footer{margin-top:36px;font-size:13px;color:var(--muted)}
     <span class="chip core">Griffin</span>
     <span class="chip core">Lance</span>
     <span class="chip core">Saket</span>
+    <span class="chip">Stella</span>
+    <span class="chip">Saket's sister</span>
+    <span class="chip">Griffin's parents</span>
+    <span class="chip">Saket's mom</span>
     <span class="chip tbd">+ friends?</span>
-    <span class="chip tbd">+ family?</span>
-    <span class="note">Dark chips are the core group, here all week. Others join for parts; each plan item shows who's in.</span>
+    <span class="note">Dark chips are the core group, here all week. Stella is Griffin's sister. Family joins for parts; each plan item shows who's in.</span>
   </div>
 
   <h2>Week at a glance</h2>
   <div class="glance" id="glance" role="tablist" aria-label="Days"></div>
+  <div class="card lake"><span class="pill idea">Idea</span><strong>Lakehouse for a few days</strong><span>Dates and who's going TBD; it'll take over whichever days it lands on.</span></div>
   <div class="card day" id="day" role="tabpanel"></div>
 
   <h2>Open questions</h2>
   <div class="card">
     <ol class="qs">
+      <li>Tue Nov 24, 7:30 dinner for 8: which restaurant?</li>
+      <li>Lakehouse: which days, and who's going?</li>
+      <li>Wed night: which bar for ~5 PM pre-drinks, and is Vice Park the club? Need a table or tickets?</li>
       <li>Where is everyone staying (neighborhood is enough), and does that change mid-week?</li>
-      <li>Who are the friends and family joining, and which days are they in?</li>
+      <li>Who else is joining (friends, family), and which days? Stella, Saket's sister, Griffin's parents and Saket's mom are in for Tue dinner; Stella and Saket's sister for Wed.</li>
       <li>Thanksgiving Thursday: family dinner at someone's home, a restaurant, or something else? Most restaurants are closed or prix-fixe that day.</li>
       <li>Arrival and departure: when do Lance and Saket land Fri, and when does everyone leave Sat 28?</li>
       <li>Any must-dos: a Cowboys or Mavericks game, a big-night dinner worth booking ahead?</li>
-      <li>How big are the group dinners? The openings below are for 4; 6+ usually means calling the restaurant.</li>
+      <li>Which other nights want a dinner, and for how many? The openings shown are for 4; 6+ usually means calling the restaurant.</li>
       <li>Car or rideshare? It decides how far afield (Bishop Arts, Fort Worth) is easy.</li>
     </ol>
   </div>
@@ -171,14 +181,17 @@ const DAYS=[
    morning:{s:"open"},
    afternoon:{s:"idea",t:"Dallas Arboretum",n:"Holiday displays are usually up by late Nov.",who:["?"]},
    evening:{s:"open",dinner:true}}},
- {d:"2026-11-24",title:"Tuesday",slots:{
+ {d:"2026-11-24",title:"Family dinner night",tag:"Dinner 8",slots:{
    morning:{s:"open"},
    afternoon:{s:"idea",t:"Downtown: Sixth Floor Museum, Klyde Warren Park",who:["?"]},
-   evening:{s:"open",dinner:true}}},
- {d:"2026-11-25",title:"Thanksgiving Eve",tag:"Wed",slots:{
+   evening:{s:"decided",t:"7:30 PM · Dinner for 8",n:"Booked. Restaurant: which one? (to fill in)",who:[...CORE,"Stella","Saket's sister","Griffin's parents","Saket's mom"]}}},
+ {d:"2026-11-25",title:"Thanksgiving Eve",tag:"Tatsu",slots:{
    morning:{s:"open"},
-   afternoon:{s:"open",n:"Family arrivals?"},
-   evening:{s:"idea",t:"Night out before the holiday",n:"Busiest bar night of the year; book early if it's dinner.",who:[...CORE,"?"],dinner:true}}},
+   afternoon:{s:"open"},
+   evening:[
+     {s:"idea",t:"~5 PM · Pre-drinks at a bar",n:"Somewhere near Tatsu (Old East Dallas)? Apothecary in Lower Greenville is a short hop.",who:["Griffin","Saket","Stella","Saket's sister"]},
+     {s:"decided",t:"7:45 PM · Tatsu, party of 4",n:"Booked.",link:"https://www.exploretock.com/tatsudallas/",who:["Griffin","Saket","Stella","Saket's sister"]},
+     {s:"idea",t:"After: club, maybe Vice Park",n:"Busiest going-out night of the year; check if they need a table or tickets.",who:["Griffin","Saket","Stella","Saket's sister","?"]}]}},
  {d:"2026-11-26",title:"Thanksgiving",tag:"🦃",slots:{
    morning:{s:"idea",t:"Turkey trot?",who:["?"]},
    afternoon:{s:"idea",t:"Cowboys Thanksgiving game",n:"They host every year; watch party or try for tickets.",who:["?"]},
@@ -235,10 +248,17 @@ function dinnerBlock(d){
     <div class="foot">Bigger group? Data is for 4; call ahead for 6+. ${grid}.</div></div>`;
 }
 
+const items=s=>Array.isArray(s)?s:[s];
+const topStatus=s=>{const st=items(s).map(i=>i.s);return st.includes("decided")?"decided":st.includes("idea")?"idea":"open"};
+function itemHTML(s,d){return `<div class="item">
+      <div class="line"><span class="pill ${s.s}">${LABEL[s.s]}</span><span class="title">${s.link?`<a href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.t)}</a>`:esc(s.t||(s.s==="open"?"Nothing yet":""))}</span></div>
+      ${s.n?`<p>${esc(s.n)}</p>`:""}
+      ${s.who?`<div class="who">${chips(s.who)}</div>`:""}
+      ${s.dinner?dinnerBlock(d):""}</div>`}
 function renderGlance(){
   $("#glance").innerHTML=DAYS.map(x=>`<button class="g${x.d===cur?" on":""}" role="tab" aria-selected="${x.d===cur}" data-d="${x.d}">
     <small>${dow(x.d)}</small><b>${dnum(x.d)}</b>
-    <span class="dots">${["morning","afternoon","evening"].map(k=>`<i class="${x.slots[k].s}" title="${k}: ${LABEL[x.slots[k].s]}"></i>`).join("")}</span>
+    <span class="dots">${["morning","afternoon","evening"].map(k=>{const st=topStatus(x.slots[k]);return `<i class="${st}" title="${k}: ${LABEL[st]}"></i>`}).join("")}</span>
     <span class="tag">${esc(x.tag||"")}&nbsp;</span></button>`).join("");
 }
 
@@ -246,12 +266,7 @@ function renderDay(){
   const x=DAYS.find(y=>y.d===cur);
   const long=dt(x.d).toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"});
   $("#day").innerHTML=`<h3>${esc(x.title)}</h3><div class="sub">${long}</div>`+
-    ["morning","afternoon","evening"].map(k=>{const s=x.slots[k];return `<div class="slot"><div class="when">${k}</div><div class="what">
-      <div class="line"><span class="pill ${s.s}">${LABEL[s.s]}</span><span class="title">${esc(s.t||(s.s==="open"?"Nothing yet":""))}</span></div>
-      ${s.n?`<p>${esc(s.n)}</p>`:""}
-      ${s.who?`<div class="who">${chips(s.who)}</div>`:""}
-      ${s.dinner?dinnerBlock(x.d):""}
-    </div></div>`}).join("");
+    ["morning","afternoon","evening"].map(k=>`<div class="slot"><div class="when">${k}</div><div class="what">${items(x.slots[k]).map(s=>itemHTML(s,x.d)).join("")}</div></div>`).join("");
 }
 
 function pick(d,push){cur=d;renderGlance();renderDay();if(push)history.replaceState(null,"","#"+d)}
