@@ -110,12 +110,12 @@ footer{margin-top:36px;font-size:13px;color:var(--muted)}
     <div class="top">
       <div>
         <h1>Dallas, Nov 20–28</h1>
-        <p>A rough plan of what fits where. Thanksgiving is Thu Nov 26. <strong>Nothing is booked</strong> unless it says Decided.</p>
+        <p>A rough plan of what fits where. Thanksgiving is Thu Nov 26. <strong>Nothing is booked</strong> unless it says Booked.</p>
       </div>
       <button class="theme" id="theme" type="button" aria-label="Toggle light or dark">◐ Theme</button>
     </div>
     <div class="legend">
-      <span class="pill decided">Decided</span>
+      <span class="pill decided">Booked</span>
       <span class="pill idea">Idea</span>
       <span class="pill open">Open</span>
     </div>
@@ -212,7 +212,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const dt=d=>new Date(d+"T12:00:00");
 const dow=d=>dt(d).toLocaleDateString("en-US",{weekday:"short"});
 const dnum=d=>dt(d).getDate();
-const LABEL={decided:"Decided",idea:"Idea",open:"Open"};
+const LABEL={decided:"Booked",idea:"Idea",open:"Open"};
 const chips=who=>(who||[]).map(n=>n==="?"?`<span class="chip tbd">+ who?</span>`:`<span class="chip${CORE.includes(n)?" core":""}">${esc(n)}</span>`).join("");
 
 let DATA=null, DATA_ERR=false, cur=null;
