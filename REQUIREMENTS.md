@@ -72,7 +72,7 @@ Owner: the "Dallas trip rough plan" session. Live at https://griffinw1.github.io
 - ✅ Joining for parts: Griffin's sister Stella, Saket's sister, Griffin's parents, Saket's mom (+ others TBD). Name chips per item.
 
 ### 2.2 What's on the books (the only "booked" items)
-- ✅ **Tue Nov 24, 7:30 PM: dinner for 8.** Griffin, Lance, Saket, Stella, Saket's sister, Griffin's parents, Saket's mom. Restaurant: ❓
+- ✅ **Tue Nov 24, 7:30 PM: dinner for 8.** Griffin, Lance, Saket, Stella, Saket's sister, Griffin's parents, Saket's mom. Restaurant: **Casa Brasa** (Park Cities; linked to its Resy page).
 - ✅ **Wed Nov 25, 7:45 PM: Tatsu, party of 4.** Griffin, Saket, Stella, Saket's sister.
   - ✅ Idea: pre-drinks at a bar ~5 PM.
   - ✅ Idea: club after, maybe Vice Park.
@@ -83,7 +83,7 @@ Owner: the "Dallas trip rough plan" session. Live at https://griffinw1.github.io
 - ✅ Dinner ideas for open evenings pulled from Part 1's live data (`../results.json`, fetched on load): 3 places with tables for 4 that night, preferring a 6:00–8:30 slot, then Beli Top-25 rank. Notes that groups bigger than 4 should call.
   - ⏳ "Linking to the grid for that day": trip links to `../site/#d=YYYY-MM-DD`, but the grid doesn't read the hash yet, so it opens the full grid. Needs Part 1 to support `#d=`.
   - ⏳ Ranking uses Beli Top-25 rank because `results.json` has `beli_avg` for only 1 venue; will switch to averages once Part 1 writes them into `results.json`.
-- ✅ "Open questions" list: where everyone stays, who joins when, Thanksgiving plans, lakehouse dates, Tuesday's restaurant.
+- ✅ "Open questions" list: where everyone stays, who joins when, Thanksgiving plans, lakehouse dates.
 
 ### 2.4 Acceptance
 - ✅ Readable on a phone in one scroll per day; booked items stand out (green Booked pill); links to `../site/` work. Checked at 375px light/dark, no sideways scroll.
@@ -91,13 +91,12 @@ Owner: the "Dallas trip rough plan" session. Live at https://griffinw1.github.io
 ---
 
 ## Open questions for Griffin
-1. Which restaurant is Tuesday's dinner for 8?
-2. Lakehouse: which days, and who's going?
-3. Thanksgiving (Thu Nov 26): family plans?
-4. Any other friends joining, and for which nights?
-5. When can the Mac sit untouched for ~1 h (Beli scores)?
-6. Where is everyone staying (neighborhood is enough), and does it change mid-week?
-7. When do Lance and Saket land Fri, and when does everyone leave Sat Nov 28?
-8. Wed night: which bar for ~5 PM pre-drinks, and is Vice Park the club (table or tickets needed)?
-9. Which other nights want a dinner, and for how many?
-10. Any must-dos (Cowboys Thanksgiving game, Mavericks, a big dinner to book ahead)? Car or rideshare?
+1. Lakehouse: which days, and who's going?
+2. Thanksgiving (Thu Nov 26): family plans?
+3. Any other friends joining, and for which nights?
+4. When can the Mac sit untouched for ~1 h (Beli scores)?
+5. Where is everyone staying (neighborhood is enough), and does it change mid-week?
+6. When do Lance and Saket land Fri, and when does everyone leave Sat Nov 28?
+7. Wed night: which bar for ~5 PM pre-drinks, and is Vice Park the club (table or tickets needed)?
+8. Which other nights want a dinner, and for how many?
+9. Any must-dos (Cowboys Thanksgiving game, Mavericks, a big dinner to book ahead)? Car or rideshare?
