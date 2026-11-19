@@ -116,7 +116,7 @@ function card(v, rank) {
   el.innerHTML = `<div class="ph${(v.imgs || []).length ? ' kit-load' : ''}">${photos(v)}<div class="rank">${rank}</div>${t25}${score}</div>
   <div class="body"><div><h3 class="name serif">${esc(v.name)}</h3>${vb.food ? `<div class="food">${esc(vb.food)}</div>` : ''}<div class="sub">${sub}${sub ? ' · ' : ''}${esc(plat)}</div></div>
   ${vmeta ? `<div class="vmeta">${vmeta}</div>` : ''}
-  ${v.note ? `<p class="blurb"><b>${esc(v.note)}</b></p>` : vb.vibe ? `<p class="blurb">${esc(vb.vibe)}</p>` : v.blurb ? `<p class="blurb">${esc(v.blurb)}</p>` : ''}
+  ${v.note ? `<p class="blurb"><b>${esc(v.note)}</b></p>` : vb.vibe ? `<p class="blurb full">${esc(vb.vibe)}</p>` : v.blurb ? `<p class="blurb" title="Tap to read more" onclick="this.classList.toggle('full')">${esc(v.blurb)}</p>` : ''}
   ${vtags ? `<div class="vtags">${vtags}</div>` : ''}
   ${dishes ? `<div class="dishes" title="Most recommended on Beli">${dishes}</div>` : ''}
   ${online ? stripHtml(v, cur) + `<div class="times">${timesHtml(v, cur)}</div>` : ''}

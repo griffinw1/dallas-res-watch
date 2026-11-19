@@ -177,6 +177,7 @@ background:var(--sc,#2d6a4f);border:2px solid rgba(255,255,255,.9);box-shadow:0 
 .name{font-size:27px;line-height:1.05;margin:0}
 .sub{color:var(--soft);font-size:13px}
 .blurb{color:var(--soft);font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0}
+.blurb[onclick]{cursor:pointer}.blurb.full{display:block;-webkit-line-clamp:unset;overflow:visible}
 .dishes{display:flex;flex-wrap:wrap;gap:6px}
 .dish{font-size:12px;background:var(--chip);border-radius:999px;padding:3px 9px;color:var(--ink)}
 .dish i{font-style:normal;color:var(--faint);margin-left:4px}
