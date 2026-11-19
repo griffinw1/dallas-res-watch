@@ -66,6 +66,10 @@ h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:34px
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
 /* people */
 .people{display:flex;flex-wrap:wrap;gap:8px;padding:14px}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.chip.opt{text-decoration:none;border:1px solid var(--line);background:var(--card);color:var(--accent);white-space:normal}
+.dinner .vibe{font-style:italic}
+@media (max-width:560px){.dinner li{flex-direction:column;gap:2px}.dinner li .times{text-align:left;white-space:normal}}
 .chip{display:inline-flex;align-items:center;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:500;background:var(--chip);color:var(--ink);white-space:nowrap}
 .chip.core{background:var(--chip-core);color:var(--chip-core-ink)}
 .chip.tbd{background:transparent;border:1px dashed var(--muted);color:var(--muted)}
@@ -453,14 +457,14 @@ const DAYS=[
  {d:"2026-11-24",title:"Family dinner night",tag:"Dinner 8",slots:{
    morning:{s:"open"},
    afternoon:{s:"idea",t:"Downtown: Sixth Floor Museum, Klyde Warren Park",who:["?"]},
-   evening:{s:"decided",t:"7:30 PM · Casa Brasa, dinner for 8",n:"Booked. South American steakhouse in Park Cities.",link:"https://resy.com/cities/dallas-fort-worth-tx/venues/casa-brasa",who:[...CORE,"Stella","Saket's sister","Griffin's parents","Saket's mom"]}}},
+   evening:{s:"decided",t:"7:30 PM · Casa Brasa, dinner for 8",n:"Booked. South American steakhouse in Park Cities: big, glamorous, loud at peak. Dress: elegant, no caps; collared shirt or jacket for men. Worth asking for a private dining room for 8. Kamilla, its speakeasy lounge, works for after.",link:"https://resy.com/cities/dallas-fort-worth-tx/venues/casa-brasa",who:[...CORE,"Stella","Saket's sister","Griffin's parents","Saket's mom"]}}},
  {d:"2026-11-25",title:"Thanksgiving Eve",tag:"Tatsu",slots:{
    morning:{s:"open"},
    afternoon:{s:"open"},
    evening:[
-     {s:"idea",t:"~5 PM · Pre-drinks at a bar",n:"Somewhere near Tatsu (Old East Dallas)? Apothecary in Lower Greenville is a short hop. Lance likely joins.",who:["Griffin","Lance","Saket","Stella","Saket's sister"]},
-     {s:"decided",t:"7:45 PM · Tatsu, party of 4",n:"Booked for 4 (can't add a 5th). Lance meets up after.",link:"https://www.exploretock.com/tatsudallas/",who:["Griffin","Saket","Stella","Saket's sister"]},
-     {s:"idea",t:"After: club, maybe Vice Park",n:"Busiest going-out night of the year; check if they need a table or tickets. Lance likely meets us here.",who:["Griffin","Lance","Saket","Stella","Saket's sister","?"]}]}},
+     {s:"idea",t:"~5 PM · Pre-drinks at a bar",n:"Somewhere a short ride from Tatsu (Deep Ellum). Lance likely joins.",opts:[{t:"Clifton Club · opens 4:30 · ~8 min",href:"https://cliftonclubdallas.com/"},{t:"Mike's Gemini Twin · opens 4 · ~10 min",href:"https://www.mikesgeminitwin.com/"},{t:"Apothecary · opens ~5 · ~8 min",href:"https://www.apothecary.bar/"}],who:["Griffin","Lance","Saket","Stella","Saket's sister"]},
+     {s:"decided",t:"7:45 PM · Tatsu, party of 4",n:"Booked. Michelin-starred Edomae sushi omakase (not ramen) at a ~10-seat counter in the Continental Gin Building, Deep Ellum. Prepaid on Tock, max 4, so Lance meets up after. Arrive ~7:30 (15 min early), smart casual, skip heavy cologne. Runs ~1 hr 45, out around 9:30.",link:"https://www.exploretock.com/tatsudallas/",who:["Griffin","Saket","Stella","Saket's sister"]},
+     {s:"idea",t:"After: club, maybe Vice Park",n:"From ~9:30 after Tatsu. Busiest going-out night of the year; check if they need a table or tickets. Lance likely meets us here.",who:["Griffin","Lance","Saket","Stella","Saket's sister","?"]}]}},
  {d:"2026-11-26",title:"Thanksgiving",tag:"🦃",slots:{
    morning:{s:"idea",t:"Turkey trot?",who:["?"]},
    afternoon:{s:"planned",t:"Cooking + prep",n:"Griffin's cooking. Cowboys Thanksgiving game on in the background?",who:["Griffin","?"]},
@@ -508,8 +512,8 @@ function dinnerBlock(d){
   const rows=ps.map(({v,s,prime})=>{
     const show=(prime.length?prime:s);
     const times=show.length>3?`${show[0]} – ${show[show.length-1]} <span class="meta">(${s.length} times)</span>`:show.join(", ");
-    const meta=[v.beli_rank?`Beli #${v.beli_rank}`:"",v.beli_avg?`${v.beli_avg}`:"",v.hood||""].filter(Boolean).join(" · ");
-    return `<li><span><a class="nm" href="${esc(v.url)}" target="_blank" rel="noopener">${esc(v.name)}</a><br><span class="meta">${esc(meta)}</span></span><span class="times">${times}</span></li>`;
+    const vb=VIBES[v.name]||{};const meta=[v.beli_rank?`Beli #${v.beli_rank}`:"",v.beli_avg?`${v.beli_avg}`:"",v.hood||"",vb.energy||"",vb.price||""].filter(Boolean).join(" · ");
+    return `<li><span><a class="nm" href="${esc(v.url)}" target="_blank" rel="noopener">${esc(v.name)}</a><br><span class="meta">${esc(meta)}</span>${vb.food?`<br><span class="meta vibe">${esc(vb.food)}</span>`:""}</span><span class="times">${times}</span></li>`;
   }).join("");
   return `<div class="dinner">
     <div class="hd"><span>Dinner ideas with open tables for ${DATA.party||4}</span><span>openings as of ${esc(asof)} CT</span></div>
@@ -522,6 +526,7 @@ const topStatus=s=>{const st=items(s).map(i=>i.s);return st.includes("decided")?
 function itemHTML(s,d){return `<div class="item">
       <div class="line"><span class="pill ${s.s}">${LABEL[s.s]}</span><span class="title">${s.link?`<a href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.t)}</a>`:esc(s.t||(s.s==="open"?"Nothing yet":""))}</span></div>
       ${s.n?`<p>${esc(s.n)}</p>`:""}
+      ${s.opts?`<div class="opts">${s.opts.map(o=>`<a class="chip opt" href="${esc(o.href)}" target="_blank" rel="noopener">${esc(o.t)}</a>`).join("")}</div>`:""}
       ${s.who?`<div class="who">${chips(s.who)}</div>`:""}
       ${s.dinner?dinnerBlock(d):""}</div>`}
 function renderGlance(){
@@ -548,6 +553,7 @@ const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"});
 const h=location.hash.slice(1);
 pick(DAYS.some(x=>x.d===h)?h:DAYS.some(x=>x.d===today)?today:DAYS[0].d,false);
 
+let VIBES={};fetch("../vibes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>{VIBES=j||{};if(DATA)renderDay()}).catch(()=>{});
 fetch("../results.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()})
   .then(j=>{DATA=j;renderDay()}).catch(()=>{DATA_ERR=true;renderDay()});
 
