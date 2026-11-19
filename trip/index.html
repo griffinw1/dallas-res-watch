@@ -43,6 +43,10 @@ html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,sans-serif}
 a{color:var(--accent)}
 .wrap{max-width:880px;margin:0 auto;padding:28px 16px 64px}
+.switch{display:inline-flex;gap:2px;padding:3px;margin:0 0 18px;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:var(--shadow)}
+.switch a{padding:5px 16px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:var(--soft)}
+.switch a[aria-current="page"]{background:var(--chip-core);color:var(--chip-core-ink)}
+.switch a:not([aria-current]):hover{color:var(--ink)}
 header h1{font-family:Fraunces,Georgia,serif;font-weight:650;font-size:clamp(30px,7vw,44px);line-height:1.05;margin:0 0 6px;letter-spacing:-.01em}
 header p{margin:0;color:var(--soft)}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -112,10 +116,11 @@ footer{margin-top:36px;font-size:13px;color:var(--muted)}
 </head>
 <body>
 <div class="wrap">
+  <nav class="switch" aria-label="Pages"><a href="./" aria-current="page">Plan</a><a href="../site/">Tables</a></nav>
   <header>
     <div class="top">
       <div>
-        <h1>Dallas, Nov 20–28</h1>
+        <h1>Dallas, <span style="white-space:nowrap">Nov 20–28</span></h1>
         <p>A rough plan of what fits where. Thanksgiving is Thu Nov 26. <strong>Nothing is booked</strong> unless it says Booked. Planned = happening, time or details not final.</p>
       </div>
       <button class="theme" id="theme" type="button" aria-label="Toggle light or dark">◐ Theme</button>
@@ -138,7 +143,7 @@ footer{margin-top:36px;font-size:13px;color:var(--muted)}
     <span class="chip">Griffin's parents</span>
     <span class="chip">Saket's mom</span>
     <span class="chip tbd">+ friends?</span>
-    <span class="note">Dark chips are the core group, here all week. Stella is Griffin's sister. Family joins for parts; each plan item shows who's in.</span>
+    <span class="note">Highlighted chips are the core group, here all week. Stella is Griffin's sister. Family joins for parts; each plan item shows who's in.</span>
   </div>
 
   <h2>Week at a glance</h2>
@@ -162,7 +167,7 @@ footer{margin-top:36px;font-size:13px;color:var(--muted)}
   </div>
 
   <footer>
-    Dinner ideas come from the read-only <a href="../site/" target="_blank" rel="noopener">availability grid</a> (party of 4, 5–10 PM), refreshed every few hours. They're openings, not holds.
+    Dinner ideas come from the read-only <a href="../site/">Tables page</a> (party of 4, 5–10 PM), refreshed every few hours. They're openings, not holds.
   </footer>
 </div>
 
@@ -244,7 +249,7 @@ function picks(d){
 }
 
 function dinnerBlock(d){
-  const grid=`<a href="../site/#d=${d}" target="_blank" rel="noopener">See all of ${dow(d)} in the grid</a>`;
+  const grid=`<a href="../site/#d=${d}">See all of ${dow(d)} in the tables</a>`;
   if(DATA_ERR)return `<div class="dinner"><div class="foot">Couldn't load live openings. ${grid}.</div></div>`;
   if(!DATA)return `<div class="dinner"><div class="foot">Loading openings…</div></div>`;
   const ps=picks(d);
