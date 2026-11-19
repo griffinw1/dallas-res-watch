@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cut">
+<title>Dallas Tables Map</title>
+<meta name="description" content="Map of Dallas restaurants and bars with live open tables for 4, Nov 20–28 2026. Read-only: every link opens the venue's own booking page.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--bg:#f6f3ee;--paper:#fffdf9;--ink:#1c1a17;--soft:#6b655c;--faint:#a39c91;--line:#e7e1d6;
+--accent:#a2382b;--accent-ink:#fff;--open:#1f6b46;--openbg:#e8f2ea;--chip:#f0ebe2;--gold:#b0862f;
+--chip-core:#1c1a17;--chip-core-ink:#fffdf9;
+--shadow:0 1px 2px rgba(40,30,20,.06),0 8px 24px -12px rgba(40,30,20,.18);--r:16px;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#121110;--paper:#1b1a18;--ink:#f1ece4;--soft:#aaa396;--faint:#6f695f;--line:#2c2a26;
+--accent:#e0705d;--accent-ink:#1a0f0c;--open:#7fd3a4;--openbg:#18291f;--chip:#24221f;--gold:#d9b25e;--chip-core:#f1ece4;--chip-core-ink:#121110;
+--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);color-scheme:dark}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:flex;flex-direction:column;height:100dvh}
+a{color:inherit}button{font:inherit}
+.serif{font-family:"Instrument Serif","Iowan Old Style",Georgia,serif;font-weight:400;letter-spacing:-.01em}
+/* top bar */
+.bar{position:relative;z-index:1000;flex:0 0 auto;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:saturate(1.4) blur(12px);
+-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line);padding:10px 16px 10px;padding-top:max(10px,env(safe-area-inset-top))}
+.bar-in{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;max-width:1400px;margin:0 auto}
+.r1{display:flex;align-items:center;gap:10px;min-width:0;flex:0 0 auto}
+.switch{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
+.switch a{padding:5px 14px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:var(--soft)}
+.switch a[aria-current="page"]{background:var(--chip-core);color:var(--chip-core-ink)}
+.switch a:not([aria-current]):hover{color:var(--ink)}
+.ttl{font-size:26px;line-height:1;margin:0;white-space:nowrap}
+.seg{display:inline-flex;background:var(--chip);border-radius:999px;padding:3px;flex:0 0 auto}
+.seg button{border:0;background:none;color:var(--soft);font-weight:500;font-size:13px;padding:5px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.seg button.on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.days{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1 1 360px;min-width:0}
+.days::-webkit-scrollbar{display:none}
+.days button{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:13px;padding:5px 9px;border-radius:10px;cursor:pointer;line-height:1.1;text-align:center}
+.days button small{display:block;color:var(--faint);font-size:11px}
+.days button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}.days button.on small{color:inherit;opacity:.7}
+.info{font-size:12px;color:var(--soft);white-space:nowrap}
+/* map */
+#map{flex:1 1 auto;min-height:0;background:var(--bg);z-index:1}
+.leaflet-container{font:inherit;background:var(--bg)}
+body.osm .leaflet-tile-pane{filter:saturate(.55) sepia(.12) brightness(1.02)}
+@media (prefers-color-scheme:dark){body.osm .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) saturate(.35) brightness(.82) contrast(.92)}}
+.leaflet-control-attribution{font-size:10px;background:color-mix(in srgb,var(--paper) 80%,transparent)!important;color:var(--soft)}
+.leaflet-control-attribution a{color:var(--soft)}
+.leaflet-bar a{background:var(--paper);color:var(--ink);border-color:var(--line)}
+.leaflet-bar a:hover{background:var(--chip)}
+.pinw{background:none;border:0;display:grid!important;place-items:center}
+.zfar .pin{width:27px;height:27px;font-size:10.5px;border-width:1.5px}.zfar .pin.mono{font-size:15px}.zfar .pin i{top:-8px;right:-10px;min-width:17px;height:17px;font-size:10px}
+.pin{position:relative;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--sc,#7a7368);color:#fff;font-weight:700;font-size:12.5px;
+font-variant-numeric:tabular-nums;line-height:1;border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);cursor:pointer;transition:transform .15s ease,opacity .2s}
+.pin.mono{font-family:"Instrument Serif",Georgia,serif;font-size:19px;font-weight:400;background:#7a7368;padding-top:2px}
+.pin.bar{border-radius:10px}
+.pin.dim{opacity:.42;filter:grayscale(.9)}
+.pin.approx{border-style:dashed}
+.pin.sel{transform:scale(1.25);box-shadow:0 0 0 3px var(--ink),0 6px 16px rgba(0,0,0,.4)}
+.pin:hover{transform:scale(1.12)}
+.pin i{position:absolute;top:-7px;right:-9px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--open);color:var(--paper);
+font-style:normal;font-family:Inter,sans-serif;font-size:11px;font-weight:700;display:grid;place-items:center;border:1.5px solid var(--paper);line-height:1}
+.legend{position:absolute;left:12px;bottom:22px;z-index:900;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+border:1px solid var(--line);border-radius:12px;padding:7px 10px;font-size:11px;color:var(--soft);box-shadow:var(--shadow);display:flex;flex-wrap:wrap;gap:4px 10px;max-width:calc(100% - 24px)}
+.legend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.legend b{width:10px;height:10px;border-radius:50%;display:inline-block}
+.legend .sq{border-radius:3px;background:#7a7368}
+.empty-msg{position:absolute;left:50%;top:16px;transform:translateX(-50%);z-index:900;background:var(--paper);border:1px solid var(--line);border-radius:999px;
+padding:6px 14px;font-size:13px;color:var(--soft);box-shadow:var(--shadow);white-space:nowrap}
+.stage{position:relative;flex:1 1 auto;min-height:0;display:flex}
+/* sheet / side card */
+.sheet{position:absolute;z-index:1100;background:var(--paper);color:var(--ink);box-shadow:0 -10px 40px -10px rgba(0,0,0,.35);overflow-y:auto;overscroll-behavior:contain;
+transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.sheet{left:0;right:0;bottom:0;max-height:72%;border-radius:20px 20px 0 0;transform:translateY(105%);padding-bottom:env(safe-area-inset-bottom)}
+.sheet.open{transform:none}
+@media (min-width:860px){.sheet{left:auto;right:16px;top:16px;bottom:16px;width:390px;max-height:none;border-radius:var(--r);border:1px solid var(--line);transform:translateX(calc(100% + 24px))}
+.sheet.open{transform:none}.grab{display:none}.legend{bottom:22px}}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:8px auto 0;flex:0 0 auto}
+.close{position:absolute;top:10px;right:10px;z-index:3;width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.ph{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#3b2a22,#7a4a33 55%,#c08a57);flex:0 0 auto;overflow:hidden}
+.sheet .ph{margin:10px 12px 0;border-radius:14px}
+@media (min-width:860px){.sheet .ph{margin:0;border-radius:0}}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .mono{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.85);font-size:56px}
+.ph::after{pointer-events:none;content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.5),rgba(0,0,0,0) 55%)}
+.tag25{position:absolute;left:12px;bottom:10px;z-index:2;color:#fff;font-size:11px;letter-spacing:.06em;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.credit{position:absolute;right:10px;bottom:8px;z-index:2;color:rgba(255,255,255,.85);font-size:10px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.body{padding:14px 16px 18px;display:flex;flex-direction:column;gap:10px}
+.hd{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.name{font-size:30px;line-height:1.02;margin:0}
+.sub{color:var(--soft);font-size:13px;margin-top:3px}
+.score{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.score .n{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:18px;color:#fff;background:var(--sc,#2d6a4f);box-shadow:0 3px 10px rgba(0,0,0,.25)}
+.score .l{font-size:11px;line-height:1.2;text-align:right;color:var(--soft)}.score .l b{display:block;font-size:12px;color:var(--ink)}
+.food{color:var(--ink);font-size:13.5px;font-weight:500}
+.vmeta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;color:var(--soft)}
+.vmeta b{font-weight:650;color:var(--ink);letter-spacing:.03em}
+.vmeta span+span::before{content:"·";margin-right:10px;color:var(--faint)}
+.vtags{display:flex;flex-wrap:wrap;gap:5px}
+.vtag{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-radius:999px;padding:2px 8px}
+.blurb{color:var(--soft);font-size:13px;margin:0}
+.heads{margin:0;font-size:12px;color:var(--soft);font-style:italic;padding-left:9px;border-left:2px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.lab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.dishes{display:flex;flex-wrap:wrap;gap:6px}
+.dish{font-size:12px;background:var(--chip);border-radius:999px;padding:3px 9px}
+.dish i{font-style:normal;color:var(--faint);margin-left:4px}
+.strip{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}
+.strip button{border:1px solid var(--line);background:none;border-radius:8px;padding:4px 0;font-size:11px;color:var(--faint);cursor:pointer;line-height:1.15;min-width:0}
+.strip button b{display:block;font-size:13px;color:var(--soft)}
+.strip button.has{background:var(--openbg);border-color:color-mix(in srgb,var(--open) 35%,transparent);color:var(--open)}
+.strip button.has b{color:var(--open)}
+.strip button.sel{outline:2px solid var(--ink);outline-offset:-1px}
+.times{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;align-items:center}
+.time{display:inline-block;text-decoration:none;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--open);border:1.5px solid var(--open);border-radius:9px;padding:6px 10px}
+.time:hover{background:var(--open);color:var(--paper)}
+.time.stale{opacity:.55;border-style:dashed}
+.empty{color:var(--faint);font-size:13px;font-style:italic}
+.book{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:var(--accent);color:var(--accent-ink);font-weight:650;font-size:16px;padding:14px;border-radius:12px}
+.book:hover{filter:brightness(1.08)}.book:active{transform:scale(.98)}
+.book.ghost{background:var(--chip);color:var(--ink)}
+.acts2{display:flex;flex-wrap:wrap;gap:8px}
+.sbtn{flex:1 1 0;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:1px solid var(--line);font-size:13px;font-weight:550;padding:9px 12px;border-radius:12px;background:var(--paper);white-space:nowrap}
+.sbtn:hover{border-color:var(--ink)}
+.approxn{font-size:12px;color:var(--faint)}
+.hide{display:none!important}
+@media (max-width:640px){
+ .bar{padding:8px 16px}.ttl{display:none}.info{display:none}
+ .bar-in{gap:7px 8px}.r1{flex:1 1 100%;justify-content:space-between}
+ .switch a{padding:5px 9px;font-size:12px}.seg button{padding:5px 8px;font-size:12px}.seg.when{flex:1 1 100%;display:flex}.seg.when button{flex:1;padding:5px 4px;font-size:12px}
+ .days{flex:1 1 100%}.name{font-size:27px}.leaflet-control-zoom{display:none}.empty-msg{white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 32px)}.sheet .ph{aspect-ratio:2/1}
+}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <div class="r1">
+    <nav class="switch" aria-label="Pages"><a href="../trip/">Plan</a><a href="../site/">Tables</a><a href="./" aria-current="page">Map</a></nav>
+    <h1 class="ttl serif">Dallas tables</h1>
+    <div class="seg kind" role="group" aria-label="Kind"><button data-k="restaurant">Restaurants</button><button data-k="bar">Bars</button><button data-k="all">Both</button></div>
+  </div>
+  <div class="days" id="days" role="group" aria-label="Day"></div>
+  <div class="seg when" role="group" aria-label="Time of night"><button data-when="any">Any</button><button data-when="early">Early 5–7</button><button data-when="prime">Prime 7–8:30</button><button data-when="late">Late 8:30+</button></div>
+  <span class="info" id="info"></span>
+</div></header>
+<div class="stage">
+  <div id="map" role="application" aria-label="Map of venues"></div>
+  <div class="legend" id="legend"></div>
+  <div class="empty-msg hide" id="emsg"></div>
+  <aside class="sheet" id="sheet" aria-live="polite" aria-label="Venue details"></aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(async () => {
+const $ = (s, e = document) => e.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const dow = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', {weekday: 'short'});
+const dnum = d => { const x = new Date(d + 'T12:00:00'); return (x.getMonth() + 1) + '/' + x.getDate(); };
+const h24 = t => { const m = String(t).match(/(\d+):(\d+)\s*([AP]M)/i); if (!m) return null; let h = +m[1] % 12; if (/p/i.test(m[3])) h += 12; return String(h).padStart(2, '0') + ':' + m[2]; };
+const mins = t => { const x = h24(t); return x ? (+x.slice(0, 2)) * 60 + (+x.slice(3)) : null; };
+const short = t => t.replace(':00', '').replace(' PM', 'p').replace(' AM', 'a');
+const ONLINE = ['resy', 'opentable', 'sevenrooms', 'tock'];
+const PLATFORM = {resy: 'Resy', opentable: 'OpenTable', sevenrooms: 'SevenRooms', tock: 'Tock', phone: 'Phone', walkin: 'Walk-in', unknown: 'Their site'};
+const WINDOWS = {any: [0, 1e9], early: [0, 18 * 60 + 59], prime: [19 * 60, 20 * 60 + 30], late: [20 * 60 + 31, 1e9]};
+const scoreCol = a => a == null ? '#7a7368' : a >= 9 ? '#1f6b46' : a >= 8.5 ? '#2f7d55' : a >= 8 ? '#5b8a3a' : a >= 7 ? '#a07a20' : '#a2382b';
+
+// ---- data (fetched live so the 3-hourly results.json update shows without a rebuild) ----
+const get = (u, fb) => fetch(u, {cache: 'no-cache'}).then(r => r.ok ? r.text() : null).catch(() => null).then(t => t == null ? fb : t);
+const json = t => { try { return typeof t === 'string' ? JSON.parse(t) : t; } catch (e) { return null; } };
+const [rT, vT, mT, bT, gT, viT] = await Promise.all([get('../results.json'), get('../venues.json', '[]'), get('../media.json', '{}'),
+  get('../beli_avgs.jsonl', ''), get('./geo.json', '{}'), get('../vibes.json', '{}')]);
+const res = json(rT);
+if (!res) { $('#emsg').textContent = "Couldn't load results.json"; $('#emsg').classList.remove('hide'); return; }
+const meta = Object.fromEntries((json(vT) || []).map(v => [v.name, v]));
+const media = json(mT) || {}, geo = (json(gT) || {}).venues || {}, vibes = json(viT) || {};
+const beli = {}; (bT || '').split('\n').forEach(l => { const b = json(l.trim() || 'null'); if (b && b.name) beli[b.name] = b; });
+const P = res.party || 4, dates = res.dates || [];
+const V = res.venues.map(r => {
+  const m = meta[r.name] || {}, md = media[r.name] || {}, b = beli[r.name], vb = vibes[r.name];
+  const avg = b && b.avg != null ? b.avg : (m.beli_avg ?? r.beli_avg ?? null);
+  const rt = b && b.avg != null ? b.ratings : (m.beli_ratings ?? r.beli_ratings ?? null);
+  return {
+    name: r.name, kind: m.kind || r.kind || 'restaurant', platform: m.platform || r.platform, id: m.id ?? r.id,
+    url: m.url || r.url, phone: m.phone || r.phone, hood: m.hood || r.hood, top25: m.beli_rank ?? r.beli_rank,
+    avg, ratings: rt, ratings_label: rt ? (b && /rounded/.test(b.note || '') ? Math.floor(rt / 1000) + 'k' : rt.toLocaleString('en-US')) : null,
+    dishes: ((b && b.dishes) || []).filter(d => d.dish).map(d => ({dish: d.dish.replace('... (truncated)', '…'), count: d.count})),
+    closed: /^CLOSED/.test(m.notes || r.notes || ''), note: m.public_note || '',
+    imgs: md.images || [], img_src: md.img_src, website: md.website, menu: md.menu, cuisine: md.cuisine || (b && b.beli_type) || '',
+    blurb: md.blurb, vibe: (vb && typeof vb === 'object') ? vb : null,
+    slots: r.slots || {}, status: r.status || {}, day_notes: r.day_notes || {}, geo: geo[r.name] || null,
+  };
+});
+
+// ---- same logic as page.js ----
+let state = {kind: 'restaurant', day: 'all', when: 'any'};
+try { const s = JSON.parse(localStorage.getItem('drw3') || '{}'); ['kind', 'day', 'when'].forEach(k => { if (s[k]) state[k] = s[k]; }); } catch (e) {}
+try { Object.assign(state, JSON.parse(localStorage.getItem('drwmap1') || '{}')); } catch (e) {}
+if (state.day !== 'all' && !dates.includes(state.day)) state.day = 'all';
+const slotsFor = (v, d) => { const [a, b] = WINDOWS[state.when] || WINDOWS.any; return (v.slots[d] || []).filter(t => { const m = mins(t); return m == null || (m >= a && m <= b); }); };
+const nOpen = v => dates.reduce((s, d) => s + slotsFor(v, d).length, 0);
+const firstOpen = v => dates.findIndex(d => slotsFor(v, d).length);
+const countFor = v => state.day === 'all' ? nOpen(v) : slotsFor(v, state.day).length;
+function bookUrl(v, d, t) {
+  const u = v.url; if (!u) return null; const hm = t ? h24(t) : null;
+  try {
+    switch (v.platform) {
+      case 'resy': { const x = new URL(u); if (d) x.searchParams.set('date', d); x.searchParams.set('seats', P); return x + ''; }
+      case 'opentable': { if (!v.id) return u; const x = new URL('https://www.opentable.com/restaurant/profile/' + v.id); x.searchParams.set('covers', P); if (d) x.searchParams.set('dateTime', d + 'T' + (hm || '19:00')); return x + ''; }
+      case 'sevenrooms': { const x = new URL(u); if (d) x.searchParams.set('date', d); x.searchParams.set('party_size', P); if (hm) x.searchParams.set('start_time', hm); return x + ''; }
+      case 'tock': { const x = new URL(u.replace(/\/$/, '') + '/search'); if (d) x.searchParams.set('date', d); x.searchParams.set('size', P); if (hm) x.searchParams.set('time', hm); return x + ''; }
+      default: return u;
+    }
+  } catch (e) { return u; }
+}
+function primaryBtn(v, d) {
+  const plat = PLATFORM[v.platform] || v.platform;
+  if (v.closed) return `<span class="book ghost">Closed for now</span>`;
+  if (ONLINE.includes(v.platform) && v.url) return `<a class="book" href="${esc(bookUrl(v, d))}" target="_blank" rel="noopener">Book on ${esc(plat)} <span aria-hidden="true">→</span></a>`;
+  if (v.platform === 'phone' && v.phone) return `<a class="book" href="tel:${esc(v.phone)}">Call to book · ${esc(v.phone)}</a>`;
+  if (v.platform === 'walkin') return `<span class="book ghost">Walk-in only · no reservations</span>`;
+  if (v.url) return `<a class="book" href="${esc(v.url)}" target="_blank" rel="noopener">Book on their site <span aria-hidden="true">→</span></a>`;
+  return `<span class="book ghost">No online booking</span>`;
+}
+function secondary(v) {
+  const dir = v.geo ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.name + ' Dallas TX')}` : '';
+  return [v.menu ? `<a class="sbtn" href="${esc(v.menu)}" target="_blank" rel="noopener">Menu</a>` : '',
+    v.website ? `<a class="sbtn" href="${esc(v.website)}" target="_blank" rel="noopener">Site</a>` : '',
+    (v.phone && v.platform !== 'phone') ? `<a class="sbtn" href="tel:${esc(v.phone)}" title="${esc(v.phone)}">Call</a>` : '',
+    dir ? `<a class="sbtn" href="${esc(dir)}" target="_blank" rel="noopener">Directions</a>` : ''].join('');
+}
+function timesHtml(v, d) {
+  const s = slotsFor(v, d), nt = v.day_notes[d] || '', stale = /^stale/.test(nt);
+  if (s.length) return s.map(t => `<a class="time${stale ? ' stale' : ''}" href="${esc(bookUrl(v, d, t))}" target="_blank" rel="noopener" title="Book ${dow(d)} ${dnum(d)} at ${esc(t)}${stale ? ' (older check)' : ''}">${esc(short(t))}</a>`).join('');
+  const why = /closed/i.test(nt) ? 'closed' : /error/.test(v.status[d] || '') ? 'check failed' : (v.slots[d] || []).length ? 'nothing in this time range' : 'no tables for ' + P;
+  return `<span class="empty">${dow(d)} ${dnum(d)}: ${why}</span>`;
+}
+function stripHtml(v, cur) {
+  return '<div class="strip">' + dates.map(d => {
+    const n = slotsFor(v, d).length, nt = v.day_notes[d] || '';
+    return `<button data-d="${d}" class="${n ? 'has' : ''}${d === cur ? ' sel' : ''}" title="${esc(nt || (n + ' open times'))}">${dow(d)}<b>${n ? n : (/closed/i.test(nt) ? '–' : '0')}</b></button>`;
+  }).join('') + '</div>';
+}
+
+// ---- map ----
+const dark = matchMedia('(prefers-color-scheme: dark)');
+const map = L.map('map', {zoomControl: true, attributionControl: true}).setView([32.81, -96.80], 12);
+map.zoomControl.setPosition('topleft');
+const CARTO = s => `https://{s}.basemaps.cartocdn.com/${s}/{z}/{x}/{y}{r}.png`;
+const CARTO_ATT = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
+let tiles, tileOk = 0, tileErr = 0, useOSM = false;
+function setTiles() {
+  if (tiles) map.removeLayer(tiles);
+  document.body.classList.toggle('osm', useOSM);
+  tiles = useOSM
+    ? L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'})
+    : L.tileLayer(CARTO(dark.matches ? 'dark_all' : 'light_all'), {maxZoom: 20, subdomains: 'abcd', attribution: CARTO_ATT});
+  tiles.on('tileload', () => tileOk++);
+  tiles.on('tileerror', () => { tileErr++; if (!useOSM && tileErr >= 4 && tileOk === 0) { useOSM = true; setTiles(); } });
+  tiles.addTo(map);
+}
+// CARTO now answers keyless requests with an "API key required" placeholder (a tiny ~2 KB PNG) instead of an
+// error, so probe one downtown tile first: a real one is far bigger. Anything odd -> OpenStreetMap tiles.
+try {
+  const ctl = new AbortController(); setTimeout(() => ctl.abort(), 3500);
+  const r = await fetch('https://a.basemaps.cartocdn.com/light_all/14/3786/6611.png', {signal: ctl.signal, cache: 'force-cache'});
+  useOSM = !r.ok || (await r.blob()).size < 4000;
+} catch (e) { useOSM = true; }
+setTiles();
+dark.addEventListener?.('change', () => { if (!useOSM) setTiles(); });
+map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
+
+$('#legend').innerHTML = [['9+', '#1f6b46'], ['8.5', '#2f7d55'], ['8', '#5b8a3a'], ['7', '#a07a20'], ['no score', '#7a7368']].map(([l, c]) => `<span><b style="background:${c}"></b>${l}</span>`).join('')
+  + `<span><b class="sq"></b>bar</span><span><b style="background:var(--open)"></b>open times</span>`;
+
+const markers = new Map();
+let selName = null;
+const missing = V.filter(v => !v.geo).map(v => v.name);
+V.filter(v => v.geo).forEach(v => {
+  const mk = L.marker([v.geo.lat, v.geo.lng], {keyboard: true, title: v.name, riseOnHover: true});
+  mk.on('click', () => openSheet(v.name));
+  markers.set(v.name, mk);
+});
+
+function pinHtml(v) {
+  const n = countFor(v), online = ONLINE.includes(v.platform) && !v.closed;
+  const dim = v.closed || (online && n === 0);
+  const cls = ['pin', v.avg == null ? 'mono' : '', v.kind === 'bar' ? 'bar' : '', dim ? 'dim' : '', v.geo.approx ? 'approx' : '', v.name === selName ? 'sel' : ''].filter(Boolean).join(' ');
+  const lab = v.avg != null ? v.avg.toFixed(1) : esc(v.name.replace(/^the\s+/i, '')[0]);
+  return {html: `<div class="${cls}" style="--sc:${scoreCol(v.avg)}">${lab}${online && n ? `<i>${n > 99 ? '99+' : n}</i>` : ''}</div>`, dim};
+}
+
+let fitted = false;
+function render(fit = true) {
+  document.querySelectorAll('[data-k]').forEach(b => b.classList.toggle('on', b.dataset.k === state.kind));
+  document.querySelectorAll('[data-when]').forEach(b => b.classList.toggle('on', b.dataset.when === state.when));
+  const pool = V.filter(v => state.kind === 'all' || v.kind === state.kind);
+  $('#days').innerHTML = `<button data-d="all" class="${state.day === 'all' ? 'on' : ''}">All<small>${dates.length} days</small></button>` + dates.map(d => {
+    const n = pool.filter(v => slotsFor(v, d).length).length;
+    return `<button data-d="${d}" class="${state.day === d ? 'on' : ''}">${dow(d)} ${dnum(d)}<small>${n} open</small></button>`;
+  }).join('');
+  document.querySelectorAll('#days button').forEach(b => b.onclick = () => { state.day = b.dataset.d; render(); });
+  const lit = [], shown = [];
+  markers.forEach((mk, name) => {
+    const v = V.find(x => x.name === name), on = state.kind === 'all' || v.kind === state.kind;
+    if (!on) { if (map.hasLayer(mk)) map.removeLayer(mk); return; }
+    const p = pinHtml(v);
+    mk.setIcon(L.divIcon({className: 'pinw', html: p.html, iconSize: [34, 34], iconAnchor: [17, 17]}));
+    mk.setZIndexOffset(p.dim ? 0 : 500 + Math.round((v.avg || 0) * 20));
+    if (!map.hasLayer(mk)) mk.addTo(map);
+    shown.push(mk.getLatLng()); if (!v.closed && ONLINE.includes(v.platform) && countFor(v)) lit.push(mk.getLatLng());
+  });
+  const nLit = lit.length;
+  $('#info').textContent = `${nLit} of ${shown.length} with tables online${missing.length ? ` · ${missing.length} not mapped` : ''}`;
+  const em = $('#emsg'); em.classList.toggle('hide', nLit > 0);
+  em.textContent = `No tables for ${P} ${state.day === 'all' ? 'this week' : 'on ' + dow(state.day) + ' ' + dnum(state.day)}${state.when !== 'any' ? ' in this time range' : ''}`;
+  if (fit) {
+    const pts = lit.length >= 2 ? lit : shown;
+    if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(.08), {animate: fitted, maxZoom: 15,
+      paddingTopLeft: [10, 10], paddingBottomRight: [innerWidth >= 860 && $('#sheet').classList.contains('open') ? 420 : 10, 10]});
+    fitted = true;
+  }
+  if (selName) fillSheet(selName, true);
+  try { localStorage.setItem('drwmap1', JSON.stringify(state)); } catch (e) {}
+}
+
+// ---- sheet ----
+const sheet = $('#sheet');
+let sheetDay = {};
+window.imgGone = img => { const ph = img.closest('.ph'); img.remove(); if (ph && !ph.querySelector('img')) { ph.insertAdjacentHTML('afterbegin', ph.dataset.mono); const c = ph.querySelector('.credit'); if (c) c.remove(); } };
+function fillSheet(name, keepScroll) {
+  const v = V.find(x => x.name === name); if (!v) return;
+  const online = ONLINE.includes(v.platform) && !v.closed;
+  const cur = state.day !== 'all' ? state.day : (sheetDay[name] || dates[Math.max(0, firstOpen(v))]);
+  const plat = PLATFORM[v.platform] || v.platform;
+  const mono = `<div class="mono serif">${esc(v.name.replace(/^the\s+/i, '')[0])}</div>`;
+  const img = v.imgs[0];
+  const vb = v.vibe || {};
+  const vmeta = [vb.price ? `<span><b>${esc(vb.price)}</b></span>` : '', vb.crowd ? `<span>${esc(vb.crowd)} crowd</span>` : '', vb.energy ? `<span>${esc(vb.energy)}</span>` : ''].join('');
+  const tags = (vb.tags || []).slice(0, 4).map(t => `<span class="vtag">${esc(t)}</span>`).join('');
+  const sub = [vb.food ? '' : v.cuisine, v.hood].filter(Boolean).map(esc).join(' · ');
+  const dishes = v.dishes.slice(0, 5).map(x => `<span class="dish">${esc(x.dish)}${x.count ? `<i>${x.count}</i>` : ''}</span>`).join('');
+  const st = keepScroll ? sheet.scrollTop : 0;
+  sheet.innerHTML = `<div class="grab"></div><button class="close" aria-label="Close">×</button>
+  <div class="ph" data-mono="${esc(mono)}">${img ? `<img src="${esc(img)}" alt="${esc(v.name)}" referrerpolicy="no-referrer" onerror="imgGone(this)">` : mono}
+   ${v.top25 ? `<div class="tag25">Beli Top 25 · #${v.top25}</div>` : ''}${img && v.img_src ? `<div class="credit">Photo: ${esc(v.img_src)}</div>` : ''}</div>
+  <div class="body">
+   <div class="hd"><div><h2 class="name serif">${esc(v.name)}</h2><div class="sub">${sub}${sub ? ' · ' : ''}${esc(plat)}</div></div>
+    ${v.avg != null ? `<div class="score"><div class="l"><b>Beli avg</b>${v.ratings_label ? esc(v.ratings_label) + ' ratings' : ''}</div><div class="n" style="--sc:${scoreCol(v.avg)}">${v.avg.toFixed(1)}</div></div>` : ''}</div>
+   ${vb.food ? `<div class="food">${esc(vb.food)}</div>` : ''}
+   ${vmeta ? `<div class="vmeta">${vmeta}</div>` : ''}
+   ${tags ? `<div class="vtags">${tags}</div>` : ''}
+   ${v.note ? `<p class="blurb"><b>${esc(v.note)}</b></p>` : vb.vibe ? `<p class="blurb">${esc(vb.vibe)}</p>` : v.blurb ? `<p class="blurb">${esc(v.blurb)}</p>` : ''}
+   ${vb.heads_up ? `<p class="heads">${esc(vb.heads_up)}</p>` : ''}
+   ${dishes ? `<div class="lab">Most recommended on Beli</div><div class="dishes">${dishes}</div>` : ''}
+   ${online ? `<div class="lab">Tables for ${P}</div>${stripHtml(v, cur)}<div class="times">${timesHtml(v, cur)}</div>` : ''}
+   ${primaryBtn(v, online ? cur : null)}
+   <div class="acts2">${secondary(v)}</div>
+   ${v.geo && v.geo.approx ? `<div class="approxn">Pin location is approximate.</div>` : ''}
+  </div>`;
+  sheet.scrollTop = st;
+  $('.close', sheet).onclick = closeSheet;
+  if (online) sheet.querySelectorAll('.strip button').forEach(b => b.onclick = () => { sheetDay[name] = b.dataset.d; if (state.day !== 'all') { state.day = b.dataset.d; render(false); } else fillSheet(name, true); });
+}
+function openSheet(name) {
+  const prev = selName; selName = name;
+  fillSheet(name); sheet.classList.add('open'); sheet.scrollTop = 0;
+  [prev, name].forEach(n => { const mk = markers.get(n); const v = V.find(x => x.name === n); if (mk && v && map.hasLayer(mk)) mk.setIcon(L.divIcon({className: 'pinw', html: pinHtml(v).html, iconSize: [34, 34], iconAnchor: [17, 17]})); });
+  const mk = markers.get(name);
+  if (mk) { // keep the pin visible beside/above the card
+    const pt = map.latLngToContainerPoint(mk.getLatLng()), sz = map.getSize();
+    const desk = innerWidth >= 860, sh = sheet.getBoundingClientRect();
+    const tx = desk ? (sz.x - 420) / 2 : sz.x / 2, ty = desk ? sz.y / 2 : Math.max(60, (sz.y - sh.height) / 2);
+    if (desk ? pt.x > sz.x - 430 : pt.y > sz.y - sh.height - 30) map.panBy([pt.x - tx, pt.y - ty]);
+  }
+}
+function closeSheet() {
+  sheet.classList.remove('open'); const n = selName; selName = null;
+  const mk = markers.get(n), v = V.find(x => x.name === n);
+  if (mk && v) mk.setIcon(L.divIcon({className: 'pinw', html: pinHtml(v).html, iconSize: [34, 34], iconAnchor: [17, 17]}));
+}
+map.on('click', closeSheet);
+const zf = () => map.getContainer().classList.toggle('zfar', map.getZoom() <= 12); map.on('zoomend', zf); zf();
+addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+// swipe the phone sheet down to close
+let y0 = null;
+sheet.addEventListener('touchstart', e => { y0 = sheet.scrollTop <= 0 ? e.touches[0].clientY : null; }, {passive: true});
+sheet.addEventListener('touchend', e => { if (y0 != null && e.changedTouches[0].clientY - y0 > 70 && innerWidth < 860) closeSheet(); y0 = null; }, {passive: true});
+
+document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { state.kind = b.dataset.k; if (selName && !(state.kind === 'all' || V.find(v => v.name === selName).kind === state.kind)) closeSheet(); render(); });
+document.querySelectorAll('[data-when]').forEach(b => b.onclick = () => { state.when = b.dataset.when; render(); });
+render();
+window.__map = {map, V, state, openSheet, missing};
+})();
+</script>
+</body>
+</html>
