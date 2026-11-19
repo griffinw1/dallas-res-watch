@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cut">
+<title>Dallas Trip Plan</title>
+<meta name="description" content="Rough plan for the Dallas trip, Nov 20–28 2026: who's in, what slots where, dinner ideas from live openings.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f3ec;--card:#fffdf9;--ink:#24201b;--soft:#5d554b;--muted:#8b8276;--line:#e6ded2;
+  --accent:#b8562f;--accent-soft:#f6e3d8;
+  --decided:#2f6b4f;--decided-bg:#dcefe4;
+  --idea:#9a6a12;--idea-bg:#f8ecd0;
+  --open:#7a7268;--open-bg:#efeae2;
+  --chip:#ece5da;--chip-core:#24201b;--chip-core-ink:#fffdf9;
+  --shadow:0 1px 2px rgba(60,40,20,.06),0 8px 24px -14px rgba(60,40,20,.25);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16130f;--card:#1f1b16;--ink:#f1ebe2;--soft:#c3b9ab;--muted:#8f8578;--line:#332d25;
+  --accent:#e88b62;--accent-soft:#3a2419;
+  --decided:#7fd3a4;--decided-bg:#17301f;
+  --idea:#e9c46a;--idea-bg:#352a12;
+  --open:#a79d90;--open-bg:#29241e;
+  --chip:#2c2620;--chip-core:#f1ebe2;--chip-core-ink:#16130f;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+}}
+:root[data-theme="dark"]{
+  --bg:#16130f;--card:#1f1b16;--ink:#f1ebe2;--soft:#c3b9ab;--muted:#8f8578;--line:#332d25;
+  --accent:#e88b62;--accent-soft:#3a2419;
+  --decided:#7fd3a4;--decided-bg:#17301f;
+  --idea:#e9c46a;--idea-bg:#352a12;
+  --open:#a79d90;--open-bg:#29241e;
+  --chip:#2c2620;--chip-core:#f1ebe2;--chip-core-ink:#16130f;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,sans-serif}
+a{color:var(--accent)}
+.wrap{max-width:880px;margin:0 auto;padding:28px 16px 64px}
+header h1{font-family:Fraunces,Georgia,serif;font-weight:650;font-size:clamp(30px,7vw,44px);line-height:1.05;margin:0 0 6px;letter-spacing:-.01em}
+header p{margin:0;color:var(--soft)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.theme{border:1px solid var(--line);background:var(--card);color:var(--soft);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;flex:none}
+h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:34px 0 10px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;font-size:13px;color:var(--soft)}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
+.pill.decided{background:var(--decided-bg);color:var(--decided)}
+.pill.idea{background:var(--idea-bg);color:var(--idea)}
+.pill.open{background:var(--open-bg);color:var(--open)}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.open::before{background:transparent;border:1.5px solid currentColor;width:5px;height:5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+/* people */
+.people{display:flex;flex-wrap:wrap;gap:8px;padding:14px}
+.chip{display:inline-flex;align-items:center;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:500;background:var(--chip);color:var(--ink);white-space:nowrap}
+.chip.core{background:var(--chip-core);color:var(--chip-core-ink)}
+.chip.tbd{background:transparent;border:1px dashed var(--muted);color:var(--muted)}
+.people .note{flex-basis:100%;font-size:13px;color:var(--muted);margin-top:2px}
+/* glance */
+.glance{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:6px}
+.g{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 2px;border-radius:12px;background:var(--card);border:1px solid var(--line);text-align:center}
+.g:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.g.on{border-color:var(--accent);background:var(--accent-soft)}
+.g small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.g b{font-size:18px;font-family:Fraunces,Georgia,serif;font-weight:600}
+.g .dots{display:flex;gap:3px}
+.g .dots i{width:7px;height:7px;border-radius:50%}
+.dots i.decided{background:var(--decided)}.dots i.idea{background:var(--idea)}.dots i.open{border:1.5px solid var(--open);width:4px;height:4px}
+.g .tag{font-size:10px;color:var(--accent);font-weight:600;line-height:1}
+@media (max-width:620px){.glance{grid-template-columns:repeat(5,minmax(0,1fr))}}
+/* day */
+.day{padding:18px 16px 8px;margin-top:12px}
+.day h3{margin:0;font-family:Fraunces,Georgia,serif;font-weight:600;font-size:24px}
+.day .sub{color:var(--soft);margin:2px 0 8px}
+.slot{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.slot:first-of-type{border-top:0}
+.slot .when{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;padding-top:3px}
+.slot .what{display:flex;flex-direction:column;gap:6px;min-width:0}
+.slot .line{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.slot .title{font-weight:600}
+.slot p{margin:0;color:var(--soft);font-size:14px}
+.who{display:flex;flex-wrap:wrap;gap:5px}
+@media (max-width:520px){.slot{grid-template-columns:1fr;gap:6px}}
+/* dinner ideas */
+.dinner{margin-top:4px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
+.dinner .hd{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:12px;color:var(--muted);margin-bottom:6px}
+.dinner ul{list-style:none;margin:0;padding:0}
+.dinner li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px dashed var(--line);font-size:14px}
+.dinner li:first-child{border-top:0}
+.dinner .nm{font-weight:600}
+.dinner .meta{color:var(--muted);font-size:12px}
+.dinner .times{color:var(--decided);font-size:13px;text-align:right;white-space:nowrap}
+.dinner .foot{font-size:12px;color:var(--muted);margin-top:6px}
+/* questions */
+.qs{margin:0;padding:6px 16px 6px 36px}
+.qs li{padding:7px 0;border-top:1px solid var(--line)}
+.qs li:first-child{border-top:0}
+footer{margin-top:36px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="top">
+      <div>
+        <h1>Dallas, Nov 20–28</h1>
+        <p>A rough plan of what fits where. Thanksgiving is Thu Nov 26. <strong>Nothing is booked</strong> unless it says Decided.</p>
+      </div>
+      <button class="theme" id="theme" type="button" aria-label="Toggle light or dark">◐ Theme</button>
+    </div>
+    <div class="legend">
+      <span class="pill decided">Decided</span>
+      <span class="pill idea">Idea</span>
+      <span class="pill open">Open</span>
+    </div>
+  </header>
+
+  <h2>People</h2>
+  <div class="card people">
+    <span class="chip core">Griffin</span>
+    <span class="chip core">Lance</span>
+    <span class="chip core">Saket</span>
+    <span class="chip tbd">+ friends?</span>
+    <span class="chip tbd">+ family?</span>
+    <span class="note">Dark chips are the core group, here all week. Others join for parts; each plan item shows who's in.</span>
+  </div>
+
+  <h2>Week at a glance</h2>
+  <div class="glance" id="glance" role="tablist" aria-label="Days"></div>
+  <div class="card day" id="day" role="tabpanel"></div>
+
+  <h2>Open questions</h2>
+  <div class="card">
+    <ol class="qs">
+      <li>Where is everyone staying (neighborhood is enough), and does that change mid-week?</li>
+      <li>Who are the friends and family joining, and which days are they in?</li>
+      <li>Thanksgiving Thursday: family dinner at someone's home, a restaurant, or something else? Most restaurants are closed or prix-fixe that day.</li>
+      <li>Arrival and departure: when do Lance and Saket land Fri, and when does everyone leave Sat 28?</li>
+      <li>Any must-dos: a Cowboys or Mavericks game, a big-night dinner worth booking ahead?</li>
+      <li>How big are the group dinners? The openings below are for 4; 6+ usually means calling the restaurant.</li>
+      <li>Car or rideshare? It decides how far afield (Bishop Arts, Fort Worth) is easy.</li>
+    </ol>
+  </div>
+
+  <footer>
+    Dinner ideas come from the read-only <a href="../site/" target="_blank" rel="noopener">availability grid</a> (party of 4, 5–10 PM), refreshed every few hours. They're openings, not holds.
+  </footer>
+</div>
+
+<script>
+// ---------- Plan data: edit here ----------
+// status: "decided" | "idea" | "open".  who: names; "?" renders a "+ who?" placeholder.
+const CORE=["Griffin","Lance","Saket"];
+const DAYS=[
+ {d:"2026-11-20",title:"Arrival day",tag:"Arrive",slots:{
+   morning:{s:"open",t:"Travel",n:"Flights and arrival times TBD."},
+   afternoon:{s:"idea",t:"Settle in, Katy Trail walk",n:"Easy first afternoon near wherever we're staying.",who:[...CORE]},
+   evening:{s:"idea",t:"First-night dinner",who:[...CORE,"?"],dinner:true}}},
+ {d:"2026-11-21",title:"Saturday",slots:{
+   morning:{s:"open"},
+   afternoon:{s:"idea",t:"Bishop Arts wander",n:"Shops, coffee, early bite in Oak Cliff.",who:[...CORE,"?"]},
+   evening:{s:"idea",t:"Big Saturday dinner + drinks after",n:"Bar ideas: Bar Colette, Apothecary.",who:[...CORE,"?"],dinner:true}}},
+ {d:"2026-11-22",title:"Sunday",slots:{
+   morning:{s:"idea",t:"Brunch",who:[...CORE,"?"]},
+   afternoon:{s:"idea",t:"Watch football somewhere fun",n:"Sports bar or a friend's place.",who:[...CORE,"?"]},
+   evening:{s:"open",dinner:true}}},
+ {d:"2026-11-23",title:"Monday",slots:{
+   morning:{s:"open"},
+   afternoon:{s:"idea",t:"Dallas Arboretum",n:"Holiday displays are usually up by late Nov.",who:["?"]},
+   evening:{s:"open",dinner:true}}},
+ {d:"2026-11-24",title:"Tuesday",slots:{
+   morning:{s:"open"},
+   afternoon:{s:"idea",t:"Downtown: Sixth Floor Museum, Klyde Warren Park",who:["?"]},
+   evening:{s:"open",dinner:true}}},
+ {d:"2026-11-25",title:"Thanksgiving Eve",tag:"Wed",slots:{
+   morning:{s:"open"},
+   afternoon:{s:"open",n:"Family arrivals?"},
+   evening:{s:"idea",t:"Night out before the holiday",n:"Busiest bar night of the year; book early if it's dinner.",who:[...CORE,"?"],dinner:true}}},
+ {d:"2026-11-26",title:"Thanksgiving",tag:"🦃",slots:{
+   morning:{s:"idea",t:"Turkey trot?",who:["?"]},
+   afternoon:{s:"idea",t:"Cowboys Thanksgiving game",n:"They host every year; watch party or try for tickets.",who:["?"]},
+   evening:{s:"open",t:"Thanksgiving dinner: plan TBD",n:"Family dinner vs. restaurant is an open question. Few places are open.",who:["?"],dinner:true}}},
+ {d:"2026-11-27",title:"Black Friday",slots:{
+   morning:{s:"open",n:"Slow morning."},
+   afternoon:{s:"open"},
+   evening:{s:"idea",t:"Group dinner with whoever's still in town",who:[...CORE,"?"],dinner:true}}},
+ {d:"2026-11-28",title:"Last day",tag:"Depart?",slots:{
+   morning:{s:"idea",t:"Farewell brunch",who:[...CORE,"?"]},
+   afternoon:{s:"open",n:"Departures TBD."},
+   evening:{s:"open",dinner:true}}},
+];
+// ---------- End plan data ----------
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dt=d=>new Date(d+"T12:00:00");
+const dow=d=>dt(d).toLocaleDateString("en-US",{weekday:"short"});
+const dnum=d=>dt(d).getDate();
+const LABEL={decided:"Decided",idea:"Idea",open:"Open"};
+const chips=who=>(who||[]).map(n=>n==="?"?`<span class="chip tbd">+ who?</span>`:`<span class="chip${CORE.includes(n)?" core":""}">${esc(n)}</span>`).join("");
+
+let DATA=null, DATA_ERR=false, cur=null;
+
+// minutes since midnight from "7:15 PM"
+const mins=t=>{const m=/(\d+):(\d+)\s*(AM|PM)/i.exec(t||"");if(!m)return null;let h=+m[1]%12;if(m[3].toUpperCase()==="PM")h+=12;return h*60+ +m[2]};
+
+function picks(d){
+  if(!DATA)return [];
+  return DATA.venues
+    .filter(v=>v.kind==="restaurant"&&(v.slots?.[d]||[]).length)
+    .map(v=>{const s=v.slots[d];const prime=s.filter(t=>{const m=mins(t);return m>=18*60&&m<=20*60+30});return {v,s,prime}})
+    // prefer places with a 6:00–8:30 slot, then Beli list rank
+    .sort((a,b)=>(!!b.prime.length-!!a.prime.length)||((a.v.beli_rank??99)-(b.v.beli_rank??99))||(b.s.length-a.s.length))
+    .slice(0,3);
+}
+
+function dinnerBlock(d){
+  const grid=`<a href="../site/#d=${d}" target="_blank" rel="noopener">See all of ${dow(d)} in the grid</a>`;
+  if(DATA_ERR)return `<div class="dinner"><div class="foot">Couldn't load live openings. ${grid}.</div></div>`;
+  if(!DATA)return `<div class="dinner"><div class="foot">Loading openings…</div></div>`;
+  const ps=picks(d);
+  const asof=new Date(DATA.generated_at).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:"America/Chicago"});
+  const rows=ps.map(({v,s,prime})=>{
+    const show=(prime.length?prime:s);
+    const times=show.length>3?`${show[0]} – ${show[show.length-1]} <span class="meta">(${s.length} times)</span>`:show.join(", ");
+    const meta=[v.beli_rank?`Beli #${v.beli_rank}`:"",v.beli_avg?`${v.beli_avg}`:"",v.hood||""].filter(Boolean).join(" · ");
+    return `<li><span><a class="nm" href="${esc(v.url)}" target="_blank" rel="noopener">${esc(v.name)}</a><br><span class="meta">${esc(meta)}</span></span><span class="times">${times}</span></li>`;
+  }).join("");
+  return `<div class="dinner">
+    <div class="hd"><span>Dinner ideas with open tables for ${DATA.party||4}</span><span>openings as of ${esc(asof)} CT</span></div>
+    ${rows?`<ul>${rows}</ul>`:`<div class="foot">No openings found for 4 that night.</div>`}
+    <div class="foot">Bigger group? Data is for 4; call ahead for 6+. ${grid}.</div></div>`;
+}
+
+function renderGlance(){
+  $("#glance").innerHTML=DAYS.map(x=>`<button class="g${x.d===cur?" on":""}" role="tab" aria-selected="${x.d===cur}" data-d="${x.d}">
+    <small>${dow(x.d)}</small><b>${dnum(x.d)}</b>
+    <span class="dots">${["morning","afternoon","evening"].map(k=>`<i class="${x.slots[k].s}" title="${k}: ${LABEL[x.slots[k].s]}"></i>`).join("")}</span>
+    <span class="tag">${esc(x.tag||"")}&nbsp;</span></button>`).join("");
+}
+
+function renderDay(){
+  const x=DAYS.find(y=>y.d===cur);
+  const long=dt(x.d).toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"});
+  $("#day").innerHTML=`<h3>${esc(x.title)}</h3><div class="sub">${long}</div>`+
+    ["morning","afternoon","evening"].map(k=>{const s=x.slots[k];return `<div class="slot"><div class="when">${k}</div><div class="what">
+      <div class="line"><span class="pill ${s.s}">${LABEL[s.s]}</span><span class="title">${esc(s.t||(s.s==="open"?"Nothing yet":""))}</span></div>
+      ${s.n?`<p>${esc(s.n)}</p>`:""}
+      ${s.who?`<div class="who">${chips(s.who)}</div>`:""}
+      ${s.dinner?dinnerBlock(x.d):""}
+    </div></div>`}).join("");
+}
+
+function pick(d,push){cur=d;renderGlance();renderDay();if(push)history.replaceState(null,"","#"+d)}
+
+$("#glance").addEventListener("click",e=>{const b=e.target.closest("[data-d]");if(b)pick(b.dataset.d,true)});
+
+// start on the hash day, today if during the trip, else day 1
+const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"});
+const h=location.hash.slice(1);
+pick(DAYS.some(x=>x.d===h)?h:DAYS.some(x=>x.d===today)?today:DAYS[0].d,false);
+
+fetch("../results.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()})
+  .then(j=>{DATA=j;renderDay()}).catch(()=>{DATA_ERR=true;renderDay()});
+
+// theme toggle (per-viewer, optional)
+const root=document.documentElement;
+try{const t=localStorage.getItem("trip-theme");if(t)root.dataset.theme=t}catch(e){}
+$("#theme").addEventListener("click",()=>{
+  const dark=root.dataset.theme?root.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+  root.dataset.theme=dark?"light":"dark";
+  try{localStorage.setItem("trip-theme",root.dataset.theme)}catch(e){}
+});
+</script>
+</body>
+</html>
