@@ -96,10 +96,10 @@ Owner: the "Dallas trip rough plan" session. Live at https://griffinw1.github.io
 - ✅ "Plan a night" card on the Plan page: pick a night (default = next evening with an open dinner) and a dinner (restaurants with open times that night, or the booked Casa Brasa Tue / Tatsu Wed).
 - ✅ Timeline **Before · Dinner · After**: 2 nearby bars for drinks ~1.5 h before (Wed: ~5 PM), the dinner with deep-link time chips (same booking URLs as `../site/`), vibe line and dress code, then 2 late-night spots after (Tue: Kamilla; Wed: Vice Park pinned as the planned club). "Swap ↻" cycles alternatives.
 - ✅ Distance = straight line from `../map/geo.json`: walk time under 1 km (~12 min/km), else ~3 min/km driving. Bars filtered by `vibes.json` heads_up (opening hour, open days, ticketed-only, unverified) and ranked by tag fit (Before: Pre-game spot / Cocktails / Lively; After: Late night / Dancing / Lively / Cocktails).
-- ✅ Party switch 2/4/6/8 shared via localStorage `drwParty`; defaults to the head count on that night's plan item. Loads `../results_p{N}.json`, falls back to party 4 with a note on 404.
+- ✅ Openings are party of 4 only (`../results.json`); the party-size switch is postponed. When that night's group is bigger than 4, it notes "times shown are for 4; call for bigger groups".
 - ✅ "Add to plan" saves an Idea to that day's evening in localStorage (`drwTripAdds`) with a Remove button. Nothing is booked or sent anywhere.
 - ✅ Checked with Playwright at 390px and 1300px, light and dark: no sideways scroll, no script errors.
-- ⏳ Party 2/6/8 tables appear once `results_p2/p6/p8.json` are published. Vice Park has no map pin (not in `geo.json`).
+- ⏳ Vice Park has no map pin (not in `geo.json`).
 
 ---
 

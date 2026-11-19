@@ -72,19 +72,18 @@ h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:34px
 @media (max-width:560px){.dinner li{flex-direction:column;gap:2px}.dinner li .times{text-align:left;white-space:normal}}
 .pan{padding:14px;display:flex;flex-direction:column;gap:12px}
 .pan-intro{margin:0;color:var(--soft);font-size:14px}
-.pan-nights,.pan-party{position:relative;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.pan-nights{position:relative;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px}
 .pan-nights::-webkit-scrollbar{display:none}
-.pan-nights button,.pan-party button{position:relative;z-index:1;flex:none;border:1px solid var(--line);background:var(--card);color:var(--soft);border-radius:999px;padding:6px 11px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
-.pan-nights button.on,.pan-party button.on{border-color:transparent;color:var(--chip-core-ink);background:var(--chip-core)}
-.pan-nights.kit-on button.on,.pan-party.kit-on button.on{background:transparent;border-color:transparent}
-.pan-nights .kit-ind,.pan-party .kit-ind{background:var(--chip-core);border-radius:999px;box-shadow:0 2px 8px -2px rgba(0,0,0,.25)}
+.pan-nights button{position:relative;z-index:1;flex:none;border:1px solid var(--line);background:var(--card);color:var(--soft);border-radius:999px;padding:6px 11px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.pan-nights button.on.on{border-color:transparent;color:var(--chip-core-ink);background:var(--chip-core)}
+.pan-nights.kit-on button.on{background:transparent;border-color:transparent}
+.pan-nights .kit-ind{background:var(--chip-core);border-radius:999px;box-shadow:0 2px 8px -2px rgba(0,0,0,.25)}
 .pan-nights i{font-style:normal;color:var(--decided);font-size:9px;margin-left:3px;vertical-align:2px}
 .pan-nights button.on i{color:inherit}
 .pan-ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .pan-ctl label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;min-width:0}
 .pan-ctl label:first-child{flex:1 1 220px}
 .pan-ctl select{font:inherit;font-size:14px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;max-width:100%;min-width:0}
-.pan-pw{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
 .pan-note{font-size:13px;color:var(--idea);background:var(--idea-bg);border-radius:10px;padding:7px 10px}
 .pan-note.soft{color:var(--muted);background:transparent;padding:0 2px}
 #panNote{display:flex;flex-direction:column;gap:6px}
@@ -296,7 +295,6 @@ html.kit-lock{overflow:hidden}
     <div class="pan-ctl">
       <label>Dinner<select id="panDinner"></select></label>
       <label>Time<select id="panTime"></select></label>
-      <div class="pan-pw"><span>Party</span><div class="pan-party" id="panParty" role="group" aria-label="Party size"></div></div>
     </div>
     <div id="panNote"></div>
     <ol class="tl" id="panTl"></ol>
@@ -635,7 +633,6 @@ $("#theme").addEventListener("click",()=>{
 <script>
 // ---------- Plan a night (read-only; "Add to plan" saves to this device only) ----------
 (() => {
-const PARTIES=[2,4,6,8];
 const BOOKED={ // the two real reservations
   "2026-11-24":{name:"Casa Brasa",time:"7:30 PM",party:8,dur:120,note:"Booked for 8.",after:[{name:"Kamilla",why:"Casa Brasa's speakeasy lounge, same spot",km:0}]},
   "2026-11-25":{name:"Tatsu Dallas",label:"Tatsu",hood:"Deep Ellum",pre:"5:00 PM",time:"7:45 PM",party:4,dur:105,note:"Booked for 4, prepaid. Arrive ~7:30.",after:[{name:"Vice Park",why:"The planned club (Lance meets up here)",km:null}]},
@@ -644,7 +641,7 @@ const BEFORE_TAGS={"Pre-game spot":2,"Cocktails":1,"Lively":1};
 const AFTER_TAGS={"Late night":2,"Dancing":2,"Lively":1,"Cocktails":1};
 const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const cache={}; let GEO={}, MEDIA={}, V=()=>window.VIBES||{};
-const st={d:null,dinner:null,time:null,party:null,partyAuto:true,swap:{before:0,after:0}};
+const st={d:null,dinner:null,time:null,swap:{before:0,after:0}};
 
 const fmt=m=>{m=((m%1440)+1440)%1440;let h=Math.floor(m/60),mm=m%60,ap=h>=12?"PM":"AM";h=h%12||12;return `${h}:${String(mm).padStart(2,"0")} ${ap}`};
 const h24=t=>{const m=mins(t);return m==null?null:`${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`};
@@ -682,13 +679,9 @@ function whoCount(d){
   if(!it||!it.who)return null;
   return it.who.reduce((n,w)=>n+(w==="?"?0:/parents/.test(w)?2:1),0)||null;
 }
-const roundParty=c=>PARTIES.find(n=>n>=c)||8;
 
-function load(P){
-  if(cache[P])return cache[P];
-  const url=P===4?"../results.json":`../results_p${P}.json`;
-  return cache[P]=fetch(url,{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>({data:j,P,fallback:false}))
-    .catch(()=>P===4?{data:null,P:4,fallback:false}:load(4).then(x=>({...x,fallback:true,wanted:P})));
+function load(){ // party size switch is postponed: openings are always for 4
+  return cache[4]||(cache[4]=fetch("../results.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>({data:j})).catch(()=>({data:null})));
 }
 
 function defaultNight(){
@@ -700,7 +693,7 @@ function defaultNight(){
 let LOADED=null;
 async function render(){
   const box=$("#pan");if(!box)return;
-  const P=st.party;const L=LOADED=await load(P);if(L!==LOADED)return;
+  const P=4;const L=LOADED=await load();if(L!==LOADED)return;
   const data=L.data;const d=st.d;const bk=BOOKED[d];
   const venues=data?data.venues:[];
   const byName=Object.fromEntries(venues.map(v=>[v.name,v]));
@@ -733,7 +726,7 @@ async function render(){
   const before=rank(BEFORE_TAGS,preM,true);
   const pickN=(arr,off,n)=>arr.length?Array.from({length:Math.min(n,arr.length)},(_,i)=>arr[(off+i)%arr.length]):[];
   const showB=pickN(before,st.swap.before,2);const after=rank(AFTER_TAGS,dm+dur,false).filter(r=>!showB.includes(r.b.name)&&!showB.some(x=>x.b===r.b));const showA=pickN(after,st.swap.after,2);
-  st._plan={d,dinner:v?.name,label:o?.label,time:st.time,before:showB[0]?.b.name,after:(bk?.after?.[0]?.name)||showA[0]?.b.name};
+  st._plan={d,dinner:v?.name,label:o?.label,time:st.time,before:showB[0]?.b.name,after:(o?.key==="booked"&&bk?.after?.[0]?.name)||showA[0]?.b.name};
 
   const thumb=n=>{const im=(MEDIA[n]?.images||[])[0];return im?`<img class="pan-th" src="${esc(im)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:`<span class="pan-th ph" aria-hidden="true">${esc((n||"?")[0])}</span>`};
   const site=n=>MEDIA[n]?.website;
@@ -743,15 +736,15 @@ async function render(){
   const pinRow=p=>`<li class="pan-v"><span class="pan-th ph" aria-hidden="true">★</span><div><div class="pan-nm">${esc(p.name)} <span class="pill planned">Planned</span></div><div class="meta">${esc([p.why,p.km===0?"same spot":p.km==null?"no map pin yet":away(p.km)].filter(Boolean).join(" · "))}</div></div></li>`;
   const vb=v?(V()[v.name]||{}):{};const hood=(o?.key==="booked"&&bk.hood)||v?.hood;
 
-  const note=L.fallback?`<div class="pan-note">No openings file for ${L.wanted} yet, so these are tables for 4. Call for bigger groups.</div>`
-    :!data?`<div class="pan-note">Couldn't load openings right now.</div>`:P>4?`<div class="pan-note">Showing tables for ${P}. Big groups often still need a call.</div>`:"";
+  const grp=whoCount(d);
+  const note=!data?`<div class="pan-note">Couldn't load openings right now.</div>`
+    :grp>4&&o?.key!=="booked"?`<div class="pan-note">That night's group is ${grp}: times shown are for 4; call for bigger groups.</div>`:"";
 
   $("#panNights").innerHTML=DAYS.map(x=>`<button type="button" class="pan-n kit-tap${x.d===d?" on":""}" data-d="${x.d}" aria-pressed="${x.d===d}">${dow(x.d)} ${dnum(x.d)}${BOOKED[x.d]?"<i>●</i>":""}</button>`).join("");
   $("#panDinner").innerHTML=opts.length?opts.map(x=>`<option value="${esc(x.key)}"${x.key===st.dinner?" selected":""}>${esc(x.label)}</option>`).join(""):`<option>No openings found</option>`;
   $("#panTime").innerHTML=o?.key==="booked"?`<option>${esc(bk.time)} (booked)</option>`:slots.map(t=>`<option${t===st.time?" selected":""}>${esc(t)}</option>`).join("")||"<option>—</option>";
   $("#panTime").disabled=o?.key==="booked"||!slots.length;
-  $("#panParty").innerHTML=PARTIES.map(n=>`<button type="button" class="kit-tap${n===P?" on":""}" data-p="${n}" aria-pressed="${n===P}">${n}</button>`).join("");
-  $("#panNote").innerHTML=note+(st.partyAuto&&whoCount(d)?`<div class="pan-note soft">Party set from who's on that night's plan (${whoCount(d)}).</div>`:"");
+  $("#panNote").innerHTML=note;
 
   const dinnerHTML=!v?`<p class="meta">Pick a dinner above.</p>`:`<div class="pan-v">${thumb(v.name)}<div>
       <div class="pan-nm">${v.url?`<a href="${esc(o.key==="booked"?(site(v.name)||v.url):bookUrl(v,d,null,P))}" target="_blank" rel="noopener">${esc(o.key==="booked"?(bk.label||v.name):v.name)}</a>`:esc(v.name)} ${o.key==="booked"?`<span class="pill decided">Booked</span>`:""}</div>
@@ -766,19 +759,17 @@ async function render(){
       <ul class="pan-l">${showB.map(r=>barRow(r,preM)).join("")||`<li class="meta">No bar data near here.</li>`}</ul></li>
     <li class="tl-i main"><div class="tl-h"><b>Dinner</b><span>${esc(st.time||"")}</span></div>${dinnerHTML}</li>
     <li class="tl-i"><div class="tl-h"><b>After</b><span>~${esc(fmt(dm+dur))}</span>${after.length>2?`<button type="button" class="pan-sw kit-tap" data-sw="after">Swap ↻</button>`:""}</div>
-      <ul class="pan-l">${(bk?.after||[]).map(pinRow).join("")}${showA.map(r=>barRow(r,dm+dur)).join("")}</ul></li>`;
-  Kit.slide($("#panNights"));Kit.slide($("#panParty"));
+      <ul class="pan-l">${(o?.key==="booked"?bk.after:[]).map(pinRow).join("")}${showA.map(r=>barRow(r,dm+dur)).join("")}</ul></li>`;
+  Kit.slide($("#panNights"));
 }
 
 function setNight(d){st.d=d;st.swap={before:0,after:0};st.dinner=BOOKED[d]?"booked":null;st.time=null;
-  const c=whoCount(d);if(c){st.party=roundParty(c);st.partyAuto=true}else{st.party=+lsGet("drwParty",4)||4;st.partyAuto=false}
   render()}
 
 function init(){
   const host=$("#pan");if(!host)return;
   host.addEventListener("click",e=>{
     const n=e.target.closest("[data-d]");if(n&&n.closest("#panNights")){setNight(n.dataset.d);return}
-    const p=e.target.closest("[data-p]");if(p){st.party=+p.dataset.p;st.partyAuto=false;lsSet("drwParty",p.dataset.p);render();return}
     const s=e.target.closest("[data-sw]");if(s){st.swap[s.dataset.sw]++;render();return}
   });
   $("#panDinner").addEventListener("change",e=>{st.dinner=e.target.value;st.time=null;st.swap={before:0,after:0};render()});
@@ -787,7 +778,7 @@ function init(){
     const p=st._plan;if(!p||!p.dinner)return;
     const all=JSON.parse(lsGet("drwTripAdds","{}")||"{}");(all[p.d]=all[p.d]||[]).push({
       t:`Night plan: ${[p.before&&`drinks at ${p.before}`,`${p.dinner.replace(" Dallas","")} ${p.time||""}`.trim(),p.after&&`then ${p.after}`].filter(Boolean).join(" → ")}`,
-      n:`Party of ${st.party}. Saved on this device only; nothing is booked.`});
+      n:`${whoCount(p.d)>4?`Group of ${whoCount(p.d)}: times were for 4, call ahead. `:""}Saved on this device only; nothing is booked.`});
     lsSet("drwTripAdds",JSON.stringify(all));
     const b=$("#panAdd");b.textContent="Added ✓";setTimeout(()=>b.textContent="Add to plan",1600);
     if(typeof pick==="function")pick(p.d,true);
