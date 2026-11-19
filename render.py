@@ -108,6 +108,8 @@ h1{font-size:clamp(40px,7vw,68px);line-height:1;margin:8px 0 10px}
 .seg{display:inline-flex;background:var(--chip);border-radius:999px;padding:3px}
 .seg button{border:0;background:none;color:var(--soft);font:inherit;font-weight:500;padding:7px 14px;border-radius:999px;cursor:pointer}
 .seg button.on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.sitenav{margin-bottom:18px}.sitenav a{text-decoration:none;color:var(--soft);font-weight:500;font-size:13px;padding:6px 16px;border-radius:999px}
+.sitenav a.on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}.sitenav a:not(.on):hover{color:var(--ink)}
 .days{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1 1 380px;min-width:0}
 .days::-webkit-scrollbar{display:none}
 .days button{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-size:13px;
@@ -246,7 +248,8 @@ def render(res: dict) -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>{CSS}</style></head><body>
-<header class="top"><div class="eyebrow">Dallas · Beli's best · table for {data['party']}</div>
+<header class="top"><nav class="seg sitenav" aria-label="Pages"><a href="../trip/">Plan</a><a class="on" href="./" aria-current="page">Tables</a></nav>
+<div class="eyebrow">Dallas · Beli's best · table for {data['party']}</div>
 <h1 class="serif">Dallas Tables</h1>
 <p class="lede">Open reservations between <b>5 and 10 PM</b>, <b>{d0:%a %b} {d0.day} – {d1:%a %b} {d1.day}</b>, at the best-rated restaurants and bars on Beli,
 ranked by the Beli community average. Tap any time to jump straight to that table. <b>{total:,}</b> open times right now ·
