@@ -14,7 +14,7 @@
   <array>
     <string>/bin/bash</string>
     <string>-lc</string>
-    <string>mkdir -p ~/.dallas-res-watch; cd /Users/griffinwright/code/dallas-res-watch &amp;&amp; bash scripts/publish.sh opentable,tock</string>
+    <string>mkdir -p ~/.dallas-res-watch; cd /Users/griffinwright/code/dallas-res-watch &amp;&amp; bash scripts/publish.sh resy,sevenrooms,opentable,tock,phone,walkin,unknown</string>
   </array>
   <key>StartInterval</key><integer>10800</integer>
   <key>RunAtLoad</key><true/>

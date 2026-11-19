@@ -15,6 +15,7 @@ can share one file.
 from __future__ import annotations
 
 import argparse
+import random
 import datetime as dt
 import json
 import sys
@@ -78,7 +79,20 @@ def merge_rows(base: dict | None, fresh: dict[tuple, dict], venues: list[dict], 
     for v in venues:
         k = key(v)
         if k in fresh:
-            out.append(fresh[k])
+            r = fresh[k]
+            old = prev.get(k)
+            if old:  # a failed check never wipes the last good answer for that date
+                for d in q.dates:
+                    if r["status"].get(d, "").startswith("error") and \
+                            old.get("status", {}).get(d) in ("ok", "none"):
+                        r["slots"][d] = old.get("slots", {}).get(d, [])
+                        r["status"][d] = old["status"][d]
+                        when = (old.get("good_at", {}) or {}).get(d) or old.get("checked_at", "")
+                        r.setdefault("good_at", {})[d] = when
+                        r.setdefault("day_notes", {})[d] = f"stale: last good check {when[5:16].replace('T', ' ')}"
+                    elif r["status"].get(d) in ("ok", "none"):
+                        r.setdefault("good_at", {})[d] = r["checked_at"]
+            out.append(r)
         elif k in prev:
             r = dict(prev[k])
             # refresh static metadata from venues.json, keep the old availability
@@ -167,9 +181,25 @@ def main() -> int:
         print(f"[browser] {len(browser_group)} venues ({', '.join(sorted({v['platform'] for v in browser_group}))})")
         try:
             from platforms.browser import headless_chrome
+            blocked_until_reset = False
             with headless_chrome() as browser:
                 for v in browser_group:
+                    if blocked_until_reset and v["platform"] == "opentable":
+                        fresh[key(v)] = row(v, VenueResult(status={d: "error:opentable rate-limited this run" for d in dates}), q)
+                        print(f"  - {v['name']} [opentable] skipped (rate-limited this run)")
+                        continue
                     run_one(v, browser)
+                    st = fresh[key(v)]["status"].values()
+                    if v["platform"] == "opentable" and st and all("403" in s for s in st if s != "skipped"):
+                        print("  ! OpenTable 403 - cooling off 120 s, then one retry")
+                        time.sleep(120)
+                        run_one(v, browser)
+                        st = fresh[key(v)]["status"].values()
+                        if all("403" in s for s in st if s != "skipped"):
+                            print("  ! still 403 - skipping the rest of OpenTable this run (last good data kept)")
+                            blocked_until_reset = True
+                    elif v["platform"] == "opentable":
+                        time.sleep(random.uniform(4, 9))  # space out page loads; Akamai rate-limits bursts
         except Exception as e:  # platform-level isolation: browser failed to start, etc.
             traceback.print_exc(limit=3)
             for v in browser_group:

@@ -82,6 +82,10 @@ def cell(v: dict, d: str) -> tuple[str, bool]:
         return f'<span class="note">{esc(reason)}</span>', False
     if st.startswith("error"):
         return f'<span class="e" title="{esc(st)}">error</span>', False
+    if slots and note and note.startswith("stale"):
+        return (f'<div title="{esc(note)}" style="opacity:.55">' + "".join(
+            f'<span class="t">{esc(t.replace(" PM", "p").replace(" AM", "a"))}</span>' for t in slots)
+            + '<div class="note">older check</div></div>'), True
     if slots:
         return "".join(f'<span class="t">{esc(t.replace(" PM", "p").replace(" AM", "a"))}</span>' for t in slots), True
     return f'<span class="dash" title="{esc(note or "no open slots in window")}">—</span>', False
