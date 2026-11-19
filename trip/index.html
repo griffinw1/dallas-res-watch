@@ -13,6 +13,7 @@
   --accent:#b8562f;--accent-soft:#f6e3d8;
   --decided:#2f6b4f;--decided-bg:#dcefe4;
   --idea:#9a6a12;--idea-bg:#f8ecd0;
+  --planned:#2d5f8a;--planned-bg:#dce9f4;
   --open:#7a7268;--open-bg:#efeae2;
   --chip:#ece5da;--chip-core:#24201b;--chip-core-ink:#fffdf9;
   --shadow:0 1px 2px rgba(60,40,20,.06),0 8px 24px -14px rgba(60,40,20,.25);
@@ -22,6 +23,7 @@
   --accent:#e88b62;--accent-soft:#3a2419;
   --decided:#7fd3a4;--decided-bg:#17301f;
   --idea:#e9c46a;--idea-bg:#352a12;
+  --planned:#8cc0ea;--planned-bg:#17283a;
   --open:#a79d90;--open-bg:#29241e;
   --chip:#2c2620;--chip-core:#f1ebe2;--chip-core-ink:#16130f;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
@@ -31,6 +33,7 @@
   --accent:#e88b62;--accent-soft:#3a2419;
   --decided:#7fd3a4;--decided-bg:#17301f;
   --idea:#e9c46a;--idea-bg:#352a12;
+  --planned:#8cc0ea;--planned-bg:#17283a;
   --open:#a79d90;--open-bg:#29241e;
   --chip:#2c2620;--chip-core:#f1ebe2;--chip-core-ink:#16130f;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
@@ -49,6 +52,7 @@ h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:34px
 .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
 .pill.decided{background:var(--decided-bg);color:var(--decided)}
 .pill.idea{background:var(--idea-bg);color:var(--idea)}
+.pill.planned{background:var(--planned-bg);color:var(--planned)}
 .pill.open{background:var(--open-bg);color:var(--open)}
 .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
 .pill.open::before{background:transparent;border:1.5px solid currentColor;width:5px;height:5px}
@@ -68,7 +72,7 @@ h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:34px
 .g b{font-size:18px;font-family:Fraunces,Georgia,serif;font-weight:600}
 .g .dots{display:flex;gap:3px}
 .g .dots i{width:7px;height:7px;border-radius:50%}
-.dots i.decided{background:var(--decided)}.dots i.idea{background:var(--idea)}.dots i.open{border:1.5px solid var(--open);width:4px;height:4px}
+.dots i.decided{background:var(--decided)}.dots i.idea{background:var(--idea)}.dots i.planned{background:var(--planned)}.dots i.open{border:1.5px solid var(--open);width:4px;height:4px}
 .g .tag{font-size:10px;color:var(--accent);font-weight:600;line-height:1}
 @media (max-width:620px){.glance{grid-template-columns:repeat(5,minmax(0,1fr))}}
 /* day */
@@ -110,12 +114,13 @@ footer{margin-top:36px;font-size:13px;color:var(--muted)}
     <div class="top">
       <div>
         <h1>Dallas, Nov 20–28</h1>
-        <p>A rough plan of what fits where. Thanksgiving is Thu Nov 26. <strong>Nothing is booked</strong> unless it says Booked.</p>
+        <p>A rough plan of what fits where. Thanksgiving is Thu Nov 26. <strong>Nothing is booked</strong> unless it says Booked. Planned = happening, time or details not final.</p>
       </div>
       <button class="theme" id="theme" type="button" aria-label="Toggle light or dark">◐ Theme</button>
     </div>
     <div class="legend">
       <span class="pill decided">Booked</span>
+      <span class="pill planned">Planned</span>
       <span class="pill idea">Idea</span>
       <span class="pill open">Open</span>
     </div>
@@ -146,7 +151,7 @@ footer{margin-top:36px;font-size:13px;color:var(--muted)}
       <li>Wed night: which bar for ~5 PM pre-drinks, and is Vice Park the club? Need a table or tickets?</li>
       <li>Where is everyone staying (neighborhood is enough), and does that change mid-week?</li>
       <li>Who else is joining (friends, family), and which days? Stella, Saket's sister, Griffin's parents and Saket's mom are in for Tue dinner; Stella and Saket's sister for Wed.</li>
-      <li>Thanksgiving Thursday: family dinner at someone's home, a restaurant, or something else? Most restaurants are closed or prix-fixe that day.</li>
+      <li>Thanksgiving dinner (Griffin cooking): who's coming, and 6 or 7 PM?</li>
       <li>Arrival and departure: when do Lance and Saket land Fri, and when does everyone leave Sat 28?</li>
       <li>Any must-dos: a Cowboys or Mavericks game, a big-night dinner worth booking ahead?</li>
       <li>Which other nights want a dinner, and for how many? The openings shown are for 4; 6+ usually means calling the restaurant.</li>
@@ -193,8 +198,8 @@ const DAYS=[
      {s:"idea",t:"After: club, maybe Vice Park",n:"Busiest going-out night of the year; check if they need a table or tickets.",who:["Griffin","Saket","Stella","Saket's sister","?"]}]}},
  {d:"2026-11-26",title:"Thanksgiving",tag:"🦃",slots:{
    morning:{s:"idea",t:"Turkey trot?",who:["?"]},
-   afternoon:{s:"idea",t:"Cowboys Thanksgiving game",n:"They host every year; watch party or try for tickets.",who:["?"]},
-   evening:{s:"open",t:"Thanksgiving dinner: plan TBD",n:"Family dinner vs. restaurant is an open question. Few places are open.",who:["?"],dinner:true}}},
+   afternoon:{s:"planned",t:"Cooking + prep",n:"Griffin's cooking. Cowboys Thanksgiving game on in the background?",who:["Griffin","?"]},
+   evening:{s:"planned",t:"~6–7 PM · Thanksgiving family dinner at home",n:"Griffin cooking. Exact time and guest list TBD.",who:["Griffin","?"]}}},
  {d:"2026-11-27",title:"Black Friday",slots:{
    morning:{s:"open",n:"Slow morning."},
    afternoon:{s:"open"},
@@ -211,7 +216,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const dt=d=>new Date(d+"T12:00:00");
 const dow=d=>dt(d).toLocaleDateString("en-US",{weekday:"short"});
 const dnum=d=>dt(d).getDate();
-const LABEL={decided:"Booked",idea:"Idea",open:"Open"};
+const LABEL={decided:"Booked",planned:"Planned",idea:"Idea",open:"Open"};
 const chips=who=>(who||[]).map(n=>n==="?"?`<span class="chip tbd">+ who?</span>`:`<span class="chip${CORE.includes(n)?" core":""}">${esc(n)}</span>`).join("");
 
 let DATA=null, DATA_ERR=false, cur=null;
@@ -248,7 +253,7 @@ function dinnerBlock(d){
 }
 
 const items=s=>Array.isArray(s)?s:[s];
-const topStatus=s=>{const st=items(s).map(i=>i.s);return st.includes("decided")?"decided":st.includes("idea")?"idea":"open"};
+const topStatus=s=>{const st=items(s).map(i=>i.s);return st.includes("decided")?"decided":st.includes("planned")?"planned":st.includes("idea")?"idea":"open"};
 function itemHTML(s,d){return `<div class="item">
       <div class="line"><span class="pill ${s.s}">${LABEL[s.s]}</span><span class="title">${s.link?`<a href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.t)}</a>`:esc(s.t||(s.s==="open"?"Nothing yet":""))}</span></div>
       ${s.n?`<p>${esc(s.n)}</p>`:""}

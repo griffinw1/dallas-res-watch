@@ -76,9 +76,10 @@ Owner: the "Dallas trip rough plan" session. Live at https://griffinw1.github.io
 - ✅ **Wed Nov 25, 7:45 PM: Tatsu, party of 4.** Griffin, Saket, Stella, Saket's sister.
   - ✅ Idea: pre-drinks at a bar ~5 PM.
   - ✅ Idea: club after, maybe Vice Park.
+- ✅ **Thu Nov 26, ~6–7 PM: Thanksgiving family dinner at home, Griffin cooking** (shown as *Planned*, not a reservation; no address). Afternoon = cooking/prep. No restaurant suggestions that night.
 
 ### 2.3 Plan structure
-- ✅ Week at a glance + a section per day with morning / afternoon / evening slots, each marked **Booked / Idea / Open**.
+- ✅ Week at a glance + a section per day with morning / afternoon / evening slots, each marked **Booked / Planned / Idea / Open**.
 - ✅ Possible **lakehouse** stretch for a few days (dates ❓), shown as a tentative block.
 - ✅ Dinner ideas for open evenings pulled from Part 1's live data (`../results.json`, fetched on load): 3 places with tables for 4 that night, preferring a 6:00–8:30 slot, then Beli Top-25 rank. Notes that groups bigger than 4 should call.
   - ⏳ "Linking to the grid for that day": trip links to `../site/#d=YYYY-MM-DD`, but the grid doesn't read the hash yet, so it opens the full grid. Needs Part 1 to support `#d=`.
@@ -92,7 +93,7 @@ Owner: the "Dallas trip rough plan" session. Live at https://griffinw1.github.io
 
 ## Open questions for Griffin
 1. Lakehouse: which days, and who's going?
-2. Thanksgiving (Thu Nov 26): family plans?
+2. Thanksgiving dinner (Griffin cooking): who's coming, and 6 or 7 PM?
 3. Any other friends joining, and for which nights?
 4. When can the Mac sit untouched for ~1 h (Beli scores)?
 5. Where is everyone staying (neighborhood is enough), and does it change mid-week?
