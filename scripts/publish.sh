@@ -13,7 +13,7 @@ OWN="${1:?usage: publish.sh <comma platforms> [extra check.py args]}"; shift || 
 cd "$(dirname "$0")/.."
 PY="${PYTHON:-$( [ -x .venv/bin/python ] && echo .venv/bin/python || echo python3 )}"
 ALL="resy,sevenrooms,opentable,tock,phone,walkin,unknown"
-OTHER=$(echo "$ALL" | tr ',' '\n' | grep -vxF -f <(echo "$OWN" | tr ',' '\n') | paste -sd, -)
+OTHER=$(echo "$ALL" | tr ',' '\n' | grep -vxF -f <(echo "$OWN" | tr ',' '\n') | paste -sd, - || true)
 HAS_REMOTE=$(git remote | head -1 || true)
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 

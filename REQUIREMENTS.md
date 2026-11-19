@@ -39,8 +39,8 @@ Status key: ✅ done · 🔨 in progress · ⏳ blocked/waiting · ⬜ not start
 ### 1.4 Page: layout & visuals
 - ✅ Separate **Restaurants** and **Bars** sections (toggle Restaurants / Bars / Both).
 - ✅ Card per venue: photo, Beli average in a coloured circle + rating count, Top-25 tag, cuisine · area · platform, short blurb, most-recommended dish chips.
-- 🔨 Photo **carousel** per card (swipe + arrows + dots).
-- 🔨 **Compact list view** toggle (one row per venue: thumb, score, 9-day open counts, Book button).
+- ✅ Photo **carousel** per card (swipe + arrows + dots).
+- ✅ **Compact list view** toggle (one row per venue: thumb, score, 9-day open counts, Book button).
 - ✅ Refined look: serif display headings, warm palette, sticky frosted toolbar.
 
 ### 1.5 Page: booking (must be obvious)
@@ -50,9 +50,9 @@ Status key: ✅ done · 🔨 in progress · ⏳ blocked/waiting · ⬜ not start
 - ✅ Secondary buttons: Menu · Site · Call.
 
 ### 1.6 Page: sorting & filtering
-- 🔨 Sort: Beli score (default) · Most open tables · Soonest available · Top-25 rank · A–Z.
-- 🔨 Filters: day, time of night (Any / Early 5–7 / Prime 7–8:30 / Late 8:30+), area, food type, "Open only", "Book online only", search (name, food, area, dish). "Reset" when any filter is on.
-- 🔨 Numbering always = rank by Beli average within the section.
+- ✅ Sort: Beli score (default) · Most open tables · Soonest available · Top-25 rank · A–Z.
+- ✅ Filters: day, time of night (Any / Early 5–7 / Prime 7–8:30 / Late 8:30+), area, food type, "Open only", "Book online only", search (name, food, area, dish). "Reset" when any filter is on.
+- ✅ Numbering always = rank by Beli average within the section (closed places show "–").
 - ✅ Filters remembered per device (localStorage).
 
 ### 1.7 Acceptance
