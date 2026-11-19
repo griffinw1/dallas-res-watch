@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- launchd job: run the OpenTable + Tock checks on this Mac every 3 hours (headless Chrome).
+     Install (yourself):
+       cp scripts/com.dallasreswatch.local.plist ~/Library/LaunchAgents/
+       launchctl load ~/Library/LaunchAgents/com.dallasreswatch.local.plist
+     Remove:
+       launchctl unload ~/Library/LaunchAgents/com.dallasreswatch.local.plist
+     Logs: ~/.dallas-res-watch/launchd.log -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.dallasreswatch.local</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>mkdir -p ~/.dallas-res-watch; cd /Users/griffinwright/code/dallas-res-watch &amp;&amp; bash scripts/publish.sh opentable,tock</string>
+  </array>
+  <key>StartInterval</key><integer>10800</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>/Users/griffinwright/.dallas-res-watch/launchd.log</string>
+  <key>StandardErrorPath</key><string>/Users/griffinwright/.dallas-res-watch/launchd.log</string>
+</dict>
+</plist>
