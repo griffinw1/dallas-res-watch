@@ -17,6 +17,9 @@
   --open:#7a7268;--open-bg:#efeae2;
   --chip:#ece5da;--chip-core:#24201b;--chip-core-ink:#fffdf9;
   --shadow:0 1px 2px rgba(60,40,20,.06),0 8px 24px -14px rgba(60,40,20,.25);
+  --k-surface:var(--card);--k-ink:var(--ink);--k-soft:var(--soft);--k-line:var(--line);--k-shadow:var(--shadow);
+  --k-shadow-lift:0 2px 4px rgba(60,40,20,.06),0 16px 30px -14px rgba(60,40,20,.34);
+  --k-glow1:rgba(184,86,47,.15);--k-glow2:rgba(176,134,47,.17);--k-grain:.05;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#16130f;--card:#1f1b16;--ink:#f1ebe2;--soft:#c3b9ab;--muted:#8f8578;--line:#332d25;
@@ -27,6 +30,8 @@
   --open:#a79d90;--open-bg:#29241e;
   --chip:#2c2620;--chip-core:#f1ebe2;--chip-core-ink:#16130f;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+  --k-shadow-lift:0 2px 4px rgba(0,0,0,.35),0 18px 36px -14px rgba(0,0,0,.75);
+  --k-glow1:rgba(232,139,98,.11);--k-glow2:rgba(217,178,94,.09);--k-grain:.07;
 }}
 :root[data-theme="dark"]{
   --bg:#16130f;--card:#1f1b16;--ink:#f1ebe2;--soft:#c3b9ab;--muted:#8f8578;--line:#332d25;
@@ -37,16 +42,14 @@
   --open:#a79d90;--open-bg:#29241e;
   --chip:#2c2620;--chip-core:#f1ebe2;--chip-core-ink:#16130f;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+  --k-shadow-lift:0 2px 4px rgba(0,0,0,.35),0 18px 36px -14px rgba(0,0,0,.75);
+  --k-glow1:rgba(232,139,98,.11);--k-glow2:rgba(217,178,94,.09);--k-grain:.07;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,sans-serif}
 a{color:var(--accent)}
 .wrap{max-width:880px;margin:0 auto;padding:28px 16px 64px}
-.switch{display:inline-flex;gap:2px;padding:3px;margin:0 0 18px;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:var(--shadow)}
-.switch a{padding:5px 16px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:var(--soft)}
-.switch a[aria-current="page"]{background:var(--chip-core);color:var(--chip-core-ink)}
-.switch a:not([aria-current]):hover{color:var(--ink)}
 header h1{font-family:Fraunces,Georgia,serif;font-weight:650;font-size:clamp(30px,7vw,44px);line-height:1.05;margin:0 0 6px;letter-spacing:-.01em}
 header p{margin:0;color:var(--soft)}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -72,6 +75,17 @@ h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:34px
 .g{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 2px;border-radius:12px;background:var(--card);border:1px solid var(--line);text-align:center}
 .g:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .g.on{border-color:var(--accent);background:var(--accent-soft)}
+/* tactile pass */
+.glance{position:relative}
+.g{transition:transform var(--dur-2) var(--ease-spring),box-shadow var(--dur-2) var(--ease-out),background-color var(--dur-2),border-color var(--dur-2)}
+@media (hover:hover){.g:hover{transform:translateY(-2px);box-shadow:var(--k-shadow-lift)}}
+.g:active{transform:scale(.95);transition-duration:90ms}
+.glance.kit-on .g.on{border-color:var(--line)}
+.glance .kit-ind{z-index:2;border:1.5px solid var(--accent);border-radius:12px;background:color-mix(in srgb,var(--accent) 6%,transparent);
+box-shadow:0 6px 18px -8px color-mix(in srgb,var(--accent) 55%,transparent)}
+.theme{transition:transform var(--dur-2) var(--ease-spring),color var(--dur-1),border-color var(--dur-1)}
+.theme:hover{color:var(--ink);border-color:var(--soft)}.theme:active{transform:scale(.95);transition-duration:90ms}
+@media (prefers-reduced-motion:reduce){.g:hover,.g:active,.theme:active{transform:none}}
 .g small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .g b{font-size:18px;font-family:Fraunces,Georgia,serif;font-weight:600}
 .g .dots{display:flex;gap:3px}
@@ -112,11 +126,86 @@ h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:20px;margin:34px
 .qs li{padding:7px 0;border-top:1px solid var(--line)}
 .qs li:first-child{border-top:0}
 footer{margin-top:36px;font-size:13px;color:var(--muted)}
+/* kit:start — shared "premium" layer for the Dallas pages (render.py is the source; trip/index.html carries a copy) */
+:root{--ease-out:cubic-bezier(.2,.8,.2,1);--ease-in-out:cubic-bezier(.65,0,.35,1);--ease-spring:cubic-bezier(.34,1.4,.64,1);
+--dur-1:150ms;--dur-2:220ms;--dur-3:280ms}
+body{isolation:isolate}
+/* ambient header glow: two soft blobs drifting on the compositor (transform only) */
+.kit-glow{position:absolute;top:0;left:0;right:0;height:560px;z-index:-1;overflow:hidden;pointer-events:none;
+-webkit-mask-image:linear-gradient(#000 35%,transparent);mask-image:linear-gradient(#000 35%,transparent)}
+.kit-glow::before,.kit-glow::after{content:"";position:absolute;width:780px;height:780px;border-radius:50%;will-change:transform}
+.kit-glow::before{top:-430px;left:-240px;background:radial-gradient(closest-side,var(--k-glow1),transparent);animation:kitDriftA 26s var(--ease-in-out) infinite alternate}
+.kit-glow::after{top:-470px;right:-300px;background:radial-gradient(closest-side,var(--k-glow2),transparent);animation:kitDriftB 34s var(--ease-in-out) infinite alternate}
+@keyframes kitDriftA{to{transform:translate3d(220px,70px,0) scale(1.12)}}
+@keyframes kitDriftB{to{transform:translate3d(-260px,90px,0) scale(.92)}}
+/* static film grain */
+.kit-grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:var(--k-grain,.05);mix-blend-mode:overlay;background-size:140px 140px;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* page switcher: Plan | Tables | Map (identical on every page) */
+.switch{position:relative;display:inline-flex;gap:2px;padding:3px;margin:0 0 18px;border:1px solid var(--k-line);border-radius:999px;
+background:var(--k-surface);box-shadow:var(--k-shadow);font:600 13px/1.2 Inter,system-ui,-apple-system,sans-serif}
+.switch a{position:relative;z-index:1;padding:6px 16px;border-radius:999px;text-decoration:none;color:var(--k-soft);
+transition:color var(--dur-2) var(--ease-out),transform var(--dur-2) var(--ease-spring)}
+.switch a[aria-current="page"]{color:var(--k-surface)}
+.switch:not(.kit-on) a[aria-current="page"]{background:var(--k-ink)}
+.switch a:not([aria-current]):hover{color:var(--k-ink)}
+.switch .kit-ind{background:var(--k-ink);border-radius:999px;box-shadow:0 2px 8px -2px rgba(0,0,0,.25)}
+.switch:has(.kit-go) a[aria-current="page"]{color:var(--k-soft)}
+.switch a.kit-go{color:var(--k-surface)}
+/* sliding selection pill (generic) */
+.kit-ind{position:absolute;left:0;top:0;z-index:0;pointer-events:none;opacity:0;
+transition:transform var(--dur-3) var(--ease-spring),width var(--dur-3) var(--ease-spring),height var(--dur-3) var(--ease-spring),opacity var(--dur-1) linear}
+/* press + hover */
+.kit-tap{transition:transform var(--dur-2) var(--ease-spring),box-shadow var(--dur-2) var(--ease-out),background-color var(--dur-1),color var(--dur-1),border-color var(--dur-1),filter var(--dur-1)}
+.kit-tap:active{transform:scale(.97);transition-duration:90ms}
+@media (hover:hover){.kit-lift:hover{transform:translateY(-2px);box-shadow:var(--k-shadow-lift)}.kit-lift:active{transform:translateY(-1px) scale(.97)}}
+/* staggered fade-up */
+.kit-rv{animation:kitUp 340ms var(--ease-out) both;animation-delay:calc(var(--kit-i,0) * 28ms)}
+@keyframes kitUp{from{opacity:0;transform:translate3d(0,10px,0)}}
+/* photo skeleton shimmer + fade-in */
+.kit-load::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.16) 50%,transparent 70%);animation:kitShimmer 1.3s linear infinite}
+@keyframes kitShimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.kit-img{opacity:0;transition:opacity 420ms var(--ease-out)}
+.kit-img.kit-in{opacity:1}
+/* lightbox */
+.kit-lb{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;background:rgba(14,11,9,.95);
+opacity:0;visibility:hidden;transition:opacity var(--dur-3) var(--ease-out),visibility 0s linear var(--dur-3)}
+.kit-lb.open{opacity:1;visibility:visible;transition:opacity var(--dur-3) var(--ease-out)}
+.kit-lb-stage{position:relative;flex:1;min-height:0;transition:transform var(--dur-3) var(--ease-spring)}
+.kit-lb-track{position:absolute;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;
+overscroll-behavior:contain;touch-action:pan-x}
+.kit-lb-track::-webkit-scrollbar{display:none}
+.kit-lb-slide{flex:0 0 100%;min-width:100%;height:100%;scroll-snap-align:center;scroll-snap-stop:always;display:flex;align-items:center;justify-content:center;
+padding:calc(60px + env(safe-area-inset-top)) 16px 8px}
+.kit-lb-slide img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 24px 70px -24px rgba(0,0,0,.85);
+transform:scale(.97);transition:opacity 420ms var(--ease-out),transform var(--dur-3) var(--ease-out)}
+.kit-lb-slide img.kit-in{transform:none}
+.kit-lb-cap{color:#f3eee6;text-align:center;padding:12px 16px calc(18px + env(safe-area-inset-bottom));font:14px/1.45 Inter,system-ui,sans-serif}
+.kit-lb-cap b{display:block;font:400 26px/1.1 "Instrument Serif",Fraunces,Georgia,serif;letter-spacing:-.01em}
+.kit-lb-cap .n{font-variant-numeric:tabular-nums;color:rgba(243,238,230,.75);font-size:13px}
+.kit-lb-cap small{display:block;margin-top:4px;color:rgba(243,238,230,.55);font-size:12px}
+.kit-lb-cap a{color:inherit}
+.kit-lb button{position:absolute;z-index:2;border:0;border-radius:50%;background:rgba(255,255,255,.13);color:#fff;cursor:pointer;
+width:44px;height:44px;display:grid;place-items:center;font:400 26px/1 system-ui,sans-serif;padding:0 0 3px;
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.kit-lb button:hover{background:rgba(255,255,255,.22)}
+.kit-lb-x{top:calc(12px + env(safe-area-inset-top));right:12px}
+.kit-lb-p,.kit-lb-n{top:50%;margin-top:-22px}.kit-lb-p{left:14px}.kit-lb-n{right:14px}
+@media (hover:none){.kit-lb-p,.kit-lb-n{display:none}}
+.kit-lb[data-one] .kit-lb-p,.kit-lb[data-one] .kit-lb-n{display:none}
+html.kit-lock{overflow:hidden}
+@media (prefers-reduced-motion:reduce){
+.kit-glow::before,.kit-glow::after,.kit-load::before,.kit-rv{animation:none}
+.kit-ind,.kit-lb-stage,.kit-lb-slide img{transition:none}
+.kit-tap:active,.kit-lift:hover,.kit-lift:active{transform:none}}
+/* kit:end */
 </style>
 </head>
 <body>
+<div class="kit-glow" aria-hidden="true"></div><div class="kit-grain" aria-hidden="true"></div>
 <div class="wrap">
-  <nav class="switch" aria-label="Pages"><a href="./" aria-current="page">Plan</a><a href="../site/">Tables</a></nav>
+  <nav class="switch" aria-label="Pages"><a href="./" aria-current="page">Plan</a><a href="../site/">Tables</a><a href="../map/">Map</a></nav>
   <header>
     <div class="top">
       <div>
@@ -171,6 +260,168 @@ footer{margin-top:36px;font-size:13px;color:var(--muted)}
   </footer>
 </div>
 
+<script>
+// kit:start — shared tactile layer (render.py is the source; trip/index.html carries a copy)
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)');
+  const still = () => RM.matches;
+  const buzz = () => { try { navigator.vibrate && navigator.vibrate(8); } catch (e) {} };
+
+  // Sliding selection pill. The indicator survives innerHTML re-renders: it is re-inserted at its old spot, then animated.
+  function place(ind, p, anim) {
+    if (!anim) ind.style.transition = 'none';
+    ind.style.width = p.w + 'px'; ind.style.height = p.h + 'px';
+    ind.style.transform = `translate3d(${p.x}px,${p.y}px,0)`; ind.style.opacity = 1;
+    if (!anim) { void ind.offsetWidth; ind.style.transition = ''; }
+  }
+  function slide(box, target, anim = true) {
+    if (!box) return;
+    let ind = box._kInd;
+    if (!ind) {
+      ind = box._kInd = document.createElement('span');
+      ind.className = 'kit-ind'; ind.setAttribute('aria-hidden', 'true');
+      box.classList.add('kit-on');
+      if ('ResizeObserver' in window) new ResizeObserver(() => slide(box, null, false)).observe(box);
+    }
+    if (ind.parentNode !== box) { box.prepend(ind); if (box._kPos) place(ind, box._kPos, false); }
+    const a = target || box.querySelector('.kit-go') || box.querySelector('.on,[aria-current="page"],[aria-selected="true"]');
+    if (!a) { ind.style.opacity = 0; box._kPos = null; return; }
+    if (!a.offsetWidth) return;                       // hidden (collapsed filters); the ResizeObserver catches it later
+    const p = {x: a.offsetLeft, y: a.offsetTop, w: a.offsetWidth, h: a.offsetHeight};
+    place(ind, p, anim && !!box._kPos && !still());
+    box._kPos = p;
+    if (box.scrollWidth > box.clientWidth + 2) {     // keep the chosen chip in view in scrolling rows
+      const l = box.scrollLeft, r = l + box.clientWidth;
+      if (p.x < l || p.x + p.w > r) box.scrollTo({left: p.x - (box.clientWidth - p.w) / 2, behavior: still() ? 'auto' : 'smooth'});
+    }
+  }
+
+  // Staggered fade-up.
+  function reveal(els, cap = 12) {
+    if (still()) return;
+    let i = 0;
+    for (const el of els) {
+      el.style.setProperty('--kit-i', Math.min(i++, cap));
+      el.classList.add('kit-rv');
+      el.addEventListener('animationend', function done(e) { if (e.target === el) { el.classList.remove('kit-rv'); el.removeEventListener('animationend', done); } });
+    }
+  }
+
+  // Count-up (text only, rAF, no layout reads).
+  function count(el, to, {dec = 0, dur = 900, from = 0} = {}) {
+    const fmt = x => dec ? x.toFixed(dec) : Math.round(x).toLocaleString('en-US');
+    if (still()) { el.textContent = fmt(to); return; }
+    const t0 = performance.now();
+    const f = t => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (to - from) * e); if (k < 1) requestAnimationFrame(f); };
+    el.textContent = fmt(from); requestAnimationFrame(f);
+  }
+  const seen = new Set();
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return; io.unobserve(e.target);
+    const el = e.target; count(el, +el.dataset.kitTo, {dec: +el.dataset.kitDec || 0, dur: 750});
+  }), {threshold: .6}) : null;
+  // Count once per key, the first time it scrolls into view (re-renders don't replay it).
+  function countOnce(el, to, key, dec = 1) {
+    if (!io || seen.has(key) || still()) return;
+    seen.add(key); el.dataset.kitTo = to; el.dataset.kitDec = dec; io.observe(el);
+  }
+
+  // Photo fade-in once loaded; drops the shimmer from its frame.
+  window.kitImg = img => { img.classList.add('kit-in'); const f = img.closest('.kit-load'); if (f) f.classList.remove('kit-load'); };
+
+  // Lightbox: swipe / arrows between photos; Esc, Back, or swipe down closes.
+  let lb, track, stage, cap, last = null, items = [], meta = {};
+  function build() {
+    lb = document.createElement('div'); lb.className = 'kit-lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'Photos');
+    lb.innerHTML = '<div class="kit-lb-stage"><div class="kit-lb-track"></div></div><div class="kit-lb-cap" aria-live="polite"></div>'
+      + '<button class="kit-lb-x" aria-label="Close">×</button><button class="kit-lb-p" aria-label="Previous photo">‹</button><button class="kit-lb-n" aria-label="Next photo">›</button>';
+    document.body.appendChild(lb);
+    stage = lb.querySelector('.kit-lb-stage'); track = lb.querySelector('.kit-lb-track'); cap = lb.querySelector('.kit-lb-cap');
+    lb.querySelector('.kit-lb-x').onclick = () => close();
+    lb.querySelector('.kit-lb-p').onclick = () => go(-1);
+    lb.querySelector('.kit-lb-n').onclick = () => go(1);
+    track.addEventListener('scroll', () => { const i = idx(); if (i !== meta.i) { meta.i = i; caption(); } }, {passive: true});
+    track.addEventListener('click', e => { if (e.target === track || e.target.classList.contains('kit-lb-slide')) close(); });
+    let sy = null, sx = 0, dy = 0, vert = false;
+    stage.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') { sy = e.clientY; sx = e.clientX; dy = 0; vert = false; } });
+    stage.addEventListener('pointermove', e => {
+      if (sy == null) return;
+      const y = e.clientY - sy, x = e.clientX - sx;
+      if (!vert) { if (Math.abs(y) < 8 && Math.abs(x) < 8) return; if (Math.abs(x) > Math.abs(y)) { sy = null; return; } vert = true; }
+      dy = Math.max(0, y); stage.style.transition = 'none';
+      stage.style.transform = `translate3d(0,${dy}px,0) scale(${1 - Math.min(dy, 400) / 2400})`;
+      lb.style.backgroundColor = `rgba(14,11,9,${(.95 * Math.max(.25, 1 - dy / 500)).toFixed(3)})`;
+    });
+    const end = () => {
+      if (sy == null && !vert) return; sy = null;
+      stage.style.transition = ''; if (vert && dy > 90) close(); else { stage.style.transform = ''; lb.style.backgroundColor = ''; }
+      vert = false; dy = 0;
+    };
+    stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
+    document.addEventListener('keydown', e => {
+      if (!lb.classList.contains('open')) return;
+      if (e.key === 'Escape') { e.preventDefault(); close(); } else if (e.key === 'ArrowRight') go(1); else if (e.key === 'ArrowLeft') go(-1);
+    });
+    addEventListener('popstate', () => { if (lb.classList.contains('open')) close(true); });
+  }
+  const idx = () => Math.round(track.scrollLeft / (track.clientWidth || 1));
+  const go = d => { const n = items.length; if (n < 2) return; const i = (idx() + d + n) % n; track.scrollTo({left: i * track.clientWidth, behavior: still() ? 'auto' : 'smooth'}); };
+  const escH = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  function caption() {
+    const n = items.length, cr = meta.credit ? `<small>Photo: ${meta.href ? `<a href="${escH(meta.href)}" target="_blank" rel="noopener">${escH(meta.credit)}</a>` : escH(meta.credit)}</small>` : '';
+    cap.innerHTML = `<b>${escH(meta.title)}</b>${n > 1 ? `<span class="n">${(meta.i || 0) + 1} / ${n}</span>` : ''}${cr}`;
+  }
+  function open(srcs, i = 0, m = {}) {
+    if (!srcs.length) return;
+    if (!lb) build();
+    items = srcs; meta = {...m, i}; last = document.activeElement;
+    lb.toggleAttribute('data-one', srcs.length < 2);
+    track.innerHTML = srcs.map((s, j) => `<div class="kit-lb-slide"><img class="kit-img" src="${escH(s)}" alt="${escH(m.title || '')} photo ${j + 1}" referrerpolicy="no-referrer" onload="kitImg(this)" ${Math.abs(j - i) > 1 ? 'loading="lazy"' : ''}></div>`).join('');
+    stage.style.transform = ''; lb.style.backgroundColor = '';
+    document.documentElement.classList.add('kit-lock');
+    lb.classList.add('open'); caption();
+    track.scrollLeft = i * track.clientWidth;
+    try { history.pushState({kitLb: 1}, ''); } catch (e) {}
+    lb.querySelector('.kit-lb-x').focus({preventScroll: true});
+    buzz();
+  }
+  function close(fromPop) {
+    if (!lb || !lb.classList.contains('open')) return;
+    if (!fromPop && history.state && history.state.kitLb) { history.back(); return; }  // popstate finishes the close
+    lb.classList.remove('open'); document.documentElement.classList.remove('kit-lock');
+    setTimeout(() => { if (!lb.classList.contains('open')) { track.innerHTML = ''; stage.style.transform = ''; lb.style.backgroundColor = ''; } }, 300);
+    if (last && last.focus) last.focus({preventScroll: true});
+  }
+
+  // Haptic tick on the taps that matter (phones that support it; silently nothing elsewhere).
+  function buzzOn(sel) { document.addEventListener('click', e => { if (e.target.closest && e.target.closest(sel)) buzz(); }, true); }
+
+  // Page switcher: the pill slides to the tapped page, then we go.
+  function switcher() {
+    document.querySelectorAll('.switch').forEach(sw => {
+      slide(sw, null, false);
+      sw.addEventListener('click', e => {
+        const a = e.target.closest('a');
+        if (!a || a.hasAttribute('aria-current') || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+        buzz(); if (still()) return;
+        e.preventDefault();
+        sw.querySelectorAll('a').forEach(x => x.classList.toggle('kit-go', x === a));
+        slide(sw, a);
+        setTimeout(() => { location.href = a.href; }, 180);
+      });
+    });
+    addEventListener('pageshow', e => { if (e.persisted) document.querySelectorAll('.switch').forEach(sw => { sw.querySelectorAll('.kit-go').forEach(x => x.classList.remove('kit-go')); slide(sw, null, false); }); });
+  }
+
+  window.Kit = {slide, reveal, count, countOnce, open, close, buzz, buzzOn, still};
+  const boot = () => {
+    switcher();
+    document.querySelectorAll('[data-count]').forEach(el => count(el, +el.dataset.count, {dur: 1100}));
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+// kit:end
+</script>
 <script>
 // ---------- Plan data: edit here ----------
 // status: "decided" | "idea" | "open".  who: names; "?" renders a "+ who?" placeholder.
@@ -288,7 +539,7 @@ function renderDay(){
     (x.alt?`<div class="alt"><div class="alt-hd">If the lakehouse falls through</div>${x.alt.map(s=>itemHTML(s,x.d)).join("")}</div>`:"");
 }
 
-function pick(d,push){cur=d;renderGlance();renderDay();if(push)history.replaceState(null,"","#"+d)}
+function pick(d,push){cur=d;renderGlance();renderDay();Kit.slide($("#glance"));Kit.reveal($("#day").children);if(push)history.replaceState(null,"","#"+d)}
 
 $("#glance").addEventListener("click",e=>{const b=e.target.closest("[data-d]");if(b)pick(b.dataset.d,true)});
 
@@ -299,6 +550,8 @@ pick(DAYS.some(x=>x.d===h)?h:DAYS.some(x=>x.d===today)?today:DAYS[0].d,false);
 
 fetch("../results.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()})
   .then(j=>{DATA=j;renderDay()}).catch(()=>{DATA_ERR=true;renderDay()});
+
+Kit.buzzOn(".g, .theme, .dinner a");
 
 // theme toggle (per-viewer, optional)
 const root=document.documentElement;

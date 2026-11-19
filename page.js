@@ -11,7 +11,7 @@ const short = t => t.replace(':00', '').replace(' PM', 'p').replace(' AM', 'a');
 const ONLINE = ['resy', 'opentable', 'sevenrooms', 'tock'];
 const WINDOWS = {any: [0, 1e9], early: [0, 18 * 60 + 59], prime: [19 * 60, 20 * 60 + 30], late: [20 * 60 + 31, 1e9]};
 
-let state = {kind: 'restaurant', day: 'all', open: false, q: '', sort: 'score', when: 'any', hood: '', cuisine: '', online: false, view: 'cards'};
+let state = {kind: 'restaurant', day: 'all', open: false, q: '', sort: 'score', when: 'any', hood: '', cuisine: '', vibe: '', online: false, view: 'cards'};
 try { Object.assign(state, JSON.parse(localStorage.getItem('drw3') || '{}')); state.q = ''; } catch (e) {}
 if (state.day !== 'all' && !dates.includes(state.day)) state.day = 'all';
 const sel = {};  // per-card chosen day
@@ -21,6 +21,15 @@ const nOpen = v => dates.reduce((s, d) => s + slotsFor(v, d).length, 0);
 const firstOpen = v => dates.findIndex(d => slotsFor(v, d).length);
 const scoreCol = a => a == null ? '#7a7368' : a >= 9 ? '#1f6b46' : a >= 8.5 ? '#2f7d55' : a >= 8 ? '#5b8a3a' : a >= 7 ? '#a07a20' : '#a2382b';
 const cuisineOf = v => (v.cuisine || '').split(/[,\-·/]| and /)[0].trim();
+// Vibe profile (vibes.json, optional). Filter buckets are derived from tags / energy / crowd / good_for.
+const vtext = v => { const b = v.vibe || {}; return [b.vibe, b.energy, b.crowd, ...(b.tags || []), ...[].concat(b.good_for || [])].filter(Boolean).join(' ').toLowerCase(); };
+const VIBES = {
+  'Lively': v => /lively|buzz|loud|party|scene|energetic|high[- ]energy|bustling|dj|club|vibrant/.test(vtext(v)),
+  'Chill': v => /chill|quiet|low[- ]key|relaxed|cozy|calm|laid[- ]back|mellow/.test(vtext(v)),
+  'Date night': v => /date|romantic|intimate|candle/.test(vtext(v)),
+  'Group-friendly': v => /group|shar|family|large part|big table|celebrat/.test(vtext(v)),
+  'Younger crowd': v => /^younger/i.test((v.vibe || {}).crowd || ''),
+};
 
 function bookUrl(v, d, t) {
   const u = v.url; if (!u) return null; const hm = t ? h24(t) : null;
@@ -75,11 +84,11 @@ const mono = v => `<div class="mono serif">${esc(v.name.replace(/^the\s+/i, '')[
 window.imgGone = img => {
   const sl = img.parentElement; img.remove();
   if (!sl) return;
-  if (sl.classList.contains('r-th')) { if (!sl.querySelector('img')) sl.innerHTML = sl.dataset.mono || ''; return; }
+  if (sl.classList.contains('r-th')) { if (!sl.querySelector('img')) { sl.innerHTML = sl.dataset.mono || ''; sl.classList.remove('kit-load'); } return; }
   const ph = sl.closest('.ph'); if (!ph) return;
   const n = sl.querySelectorAll('img').length;
   const dots = ph.querySelector('.dots');
-  if (!n) { sl.outerHTML = sl.dataset.mono || ''; }
+  if (!n) { sl.outerHTML = sl.dataset.mono || ''; ph.classList.remove('kit-load'); }
   if (n < 2) { if (dots) dots.remove(); ph.querySelectorAll('.nav').forEach(b => b.remove()); return; }
   if (dots) { dots.innerHTML = Array.from({length: n}, (_, i) => `<i class="${i ? '' : 'on'}"></i>`).join(''); sl.dispatchEvent(new Event('scroll')); }
 };
@@ -87,7 +96,7 @@ function photos(v) {
   const imgs = (v.imgs || []).slice(0, 5);
   if (!imgs.length) return mono(v);
   const dots = imgs.length > 1 ? `<div class="dots">${imgs.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>` : '';
-  return `<div class="slides" data-mono="${esc(mono(v))}">${imgs.map((u, i) => `<img ${i ? 'loading="lazy" ' : ''}src="${esc(u)}" alt="${esc(v.name)} photo ${i + 1}" referrerpolicy="no-referrer" onerror="imgGone(this)">`).join('')}</div>${dots}`
+  return `<div class="slides" data-mono="${esc(mono(v))}">${imgs.map((u, i) => `<img ${i ? 'loading="lazy" ' : ''}src="${esc(u)}" alt="${esc(v.name)} photo ${i + 1}" referrerpolicy="no-referrer" class="kit-img" onload="kitImg(this)" onerror="imgGone(this)">`).join('')}</div>${dots}`
     + (imgs.length > 1 ? `<button class="nav prev" aria-label="Previous photo">‹</button><button class="nav next" aria-label="Next photo">›</button>` : '');
 }
 
@@ -98,19 +107,27 @@ function card(v, rank) {
   const score = v.avg != null ? `<div class="score"><div class="l"><b>Beli avg</b>${v.ratings_label ? esc(v.ratings_label) + ' ratings' : ''}</div><div class="n" style="--sc:${scoreCol(v.avg)}">${v.avg.toFixed(1)}</div></div>` : '';
   const t25 = v.top25 ? `<div class="tag25">Beli Top 25 · #${v.top25}</div>` : '';
   const sub = [v.cuisine, v.hood].filter(Boolean).map(esc).join(' · ');
+  const vb = v.vibe || {};
+  const vmeta = [vb.price ? `<span><b>${esc(vb.price)}</b></span>` : '', vb.crowd ? `<span>${esc(vb.crowd)} crowd</span>` : '', vb.energy ? `<span>${esc(vb.energy)}</span>` : ''].join('');
+  const vtags = (vb.tags || []).filter(x => !/crowd$/i.test(x)).slice(0, 4).map(x => `<span class="vtag">${esc(x)}</span>`).join('');
   const dishes = (v.dishes || []).slice(0, 4).map(x => `<span class="dish">${esc(x.dish || x.name || x)}${x.count ? `<i>${x.count}</i>` : ''}</span>`).join('');
   const el = document.createElement('article');
   el.className = 'card' + (v.closed ? ' closed' : '');
-  el.innerHTML = `<div class="ph">${photos(v)}<div class="rank">${rank}</div>${t25}${score}</div>
-  <div class="body"><div><h3 class="name serif">${esc(v.name)}</h3><div class="sub">${sub}${sub ? ' · ' : ''}${esc(plat)}</div></div>
-  ${v.note ? `<p class="blurb"><b>${esc(v.note)}</b></p>` : v.blurb ? `<p class="blurb">${esc(v.blurb)}</p>` : ''}
+  el.innerHTML = `<div class="ph${(v.imgs || []).length ? ' kit-load' : ''}">${photos(v)}<div class="rank">${rank}</div>${t25}${score}</div>
+  <div class="body"><div><h3 class="name serif">${esc(v.name)}</h3>${vb.food ? `<div class="food">${esc(vb.food)}</div>` : ''}<div class="sub">${sub}${sub ? ' · ' : ''}${esc(plat)}</div></div>
+  ${vmeta ? `<div class="vmeta">${vmeta}</div>` : ''}
+  ${v.note ? `<p class="blurb"><b>${esc(v.note)}</b></p>` : vb.vibe ? `<p class="blurb">${esc(vb.vibe)}</p>` : v.blurb ? `<p class="blurb">${esc(v.blurb)}</p>` : ''}
+  ${vtags ? `<div class="vtags">${vtags}</div>` : ''}
   ${dishes ? `<div class="dishes" title="Most recommended on Beli">${dishes}</div>` : ''}
   ${online ? stripHtml(v, cur) + `<div class="times">${timesHtml(v, cur)}</div>` : ''}
+  ${vb.heads_up ? `<p class="heads">${esc(vb.heads_up)}</p>` : ''}
   <div class="acts">${primaryBtn(v, online ? cur : null)}${secondary(v)}</div></div>`;
+  el.querySelector('.ph').dataset.name = v.name;
+  const sn = el.querySelector('.score .n'); if (sn) Kit.countOnce(sn, v.avg, 'c:' + v.name);
   if (online) el.querySelectorAll('.strip button').forEach(b => b.onclick = () => {
     sel[v.name] = b.dataset.d;
     el.querySelectorAll('.strip button').forEach(x => x.classList.toggle('sel', x === b));
-    $('.times', el).innerHTML = timesHtml(v, b.dataset.d);
+    $('.times', el).innerHTML = timesHtml(v, b.dataset.d); Kit.reveal($('.times', el).children);
     const a = $('a.book', el); if (a) a.href = bookUrl(v, b.dataset.d);
   });
   const sl = $('.slides', el);
@@ -133,11 +150,12 @@ function row(v, rank) {
   el.className = 'row' + (v.closed ? ' closed' : '');
   const th = (v.imgs || [])[0];
   el.innerHTML = `<div class="r-rank">${rank}</div>
-  <div class="r-th" data-mono="${esc(mono(v))}">${th ? `<img loading="lazy" src="${esc(th)}" alt="" referrerpolicy="no-referrer" onerror="imgGone(this)">` : mono(v)}</div>
-  <div class="r-main"><div class="r-name serif">${esc(v.name)}</div><div class="sub">${[v.cuisine, v.hood, D.platforms[v.platform]].filter(Boolean).map(esc).join(' · ')}</div></div>
+  <div class="r-th${th ? ' kit-load' : ''}" data-mono="${esc(mono(v))}" data-name="${esc(v.name)}">${th ? `<img loading="lazy" src="${esc(th)}" alt="" referrerpolicy="no-referrer" class="kit-img" onload="kitImg(this)" onerror="imgGone(this)">` : mono(v)}</div>
+  <div class="r-main"><div class="r-name serif">${esc(v.name)}</div><div class="sub">${[(v.vibe || {}).food || v.cuisine, v.hood, D.platforms[v.platform]].filter(Boolean).map(esc).join(' · ')}</div>${(v.vibe || {}).price || (v.vibe || {}).energy ? `<div class="r-vibe">${[(v.vibe || {}).price, (v.vibe || {}).energy].filter(Boolean).map(esc).join(' · ')}</div>` : ''}</div>
   <div class="r-score">${v.avg != null ? `<span class="pill" style="--sc:${scoreCol(v.avg)}">${v.avg.toFixed(1)}</span>` : ''}</div>
   <div class="r-days">${online ? dates.map(d => { const n = slotsFor(v, d).length; return `<a class="mini${n ? ' has' : ''}" ${n ? `href="${esc(bookUrl(v, d))}" target="_blank" rel="noopener"` : ''} title="${dow(d)} ${dnum(d)}: ${n} open${n ? ' · tap to book' : ''}"><small>${dow(d).slice(0, 2)}</small>${n || '·'}</a>`; }).join('') : `<span class="empty">${v.closed ? 'closed' : v.platform === 'walkin' ? 'walk-in' : v.platform === 'phone' ? 'call' : 'their site'}</span>`}</div>
   <div class="r-act">${primaryBtn(v, online ? cur : null).replace('class="book', 'class="book sm').replace(' · no reservations', '').replace(/Call to book · [^<]*/, 'Call to book')}</div>`;
+  const pl = el.querySelector('.pill'); if (pl) Kit.countOnce(pl, v.avg, 'r:' + v.name);
   return el;
 }
 
@@ -147,7 +165,8 @@ function matches(v) {
   if (state.online && !ONLINE.includes(v.platform)) return false;
   if (state.hood && v.hood !== state.hood) return false;
   if (state.cuisine && cuisineOf(v) !== state.cuisine) return false;
-  if (state.q) { const s = (v.name + ' ' + (v.cuisine || '') + ' ' + (v.hood || '') + ' ' + (v.dishes || []).map(x => x.dish).join(' ')).toLowerCase(); if (!s.includes(state.q)) return false; }
+  if (state.vibe && !(VIBES[state.vibe] && VIBES[state.vibe](v))) return false;
+  if (state.q) { const b = v.vibe || {}; const s = (v.name + ' ' + (v.cuisine || '') + ' ' + (v.hood || '') + ' ' + (v.dishes || []).map(x => x.dish).join(' ') + ' ' + [b.food, b.vibe, b.dress, b.heads_up].filter(Boolean).join(' ') + ' ' + vtext(v)).toLowerCase(); if (!s.includes(state.q)) return false; }
   return true;
 }
 
@@ -173,7 +192,11 @@ function render() {
   if (![...$('#hood').options].some(o => o.value === state.hood)) state.hood = '';
   if (![...$('#cuisine').options].some(o => o.value === state.cuisine)) state.cuisine = '';
   $('#hood').value = state.hood; $('#cuisine').value = state.cuisine;
-  let shown = 0;
+  const vopts = Object.keys(VIBES).filter(k => pool.some(VIBES[k]));
+  fillSelect('#vibe', vopts, 'Any vibe'); $('#vibe').classList.toggle('hide', !vopts.length);
+  if (!vopts.includes(state.vibe)) state.vibe = '';
+  $('#vibe').value = state.vibe;
+  let shown = 0; const fresh = [];
   ['restaurant', 'bar'].forEach(k => {
     const sec = $('#s-' + k), on = state.kind === 'all' || state.kind === k;
     sec.classList.toggle('hide', !on);
@@ -181,12 +204,14 @@ function render() {
     const scoreRank = new Map(all.filter(v => !v.closed).sort(SORTS.score).map((v, i) => [v.name, i + 1]));  // closed places get no number
     const list = all.filter(matches).sort((a, b) => (a.closed - b.closed) || SORTS[state.sort](a, b));
     const g = $('#g-' + k); g.className = state.view === 'list' ? 'list' : 'grid'; g.innerHTML = '';
-    list.forEach(v => g.appendChild(state.view === 'list' ? row(v, scoreRank.get(v.name) || '–') : card(v, scoreRank.get(v.name) || '–')));
+    list.forEach(v => { const el = state.view === 'list' ? row(v, scoreRank.get(v.name) || '–') : card(v, scoreRank.get(v.name) || '–'); g.appendChild(el); if (on) fresh.push(el); });
     $('#n-' + k).textContent = `${list.length} of ${all.length} · numbered by Beli average`;
     $('#e-' + k).classList.toggle('hide', list.length > 0);
     if (on) shown += list.length;
   });
-  const nf = [state.open, state.online, state.hood, state.cuisine, state.q, state.when !== 'any'].filter(Boolean).length;
+  Kit.reveal(fresh);
+  document.querySelectorAll('.bar .seg').forEach(s => Kit.slide(s)); Kit.slide($('#days'));
+  const nf = [state.open, state.online, state.hood, state.cuisine, state.vibe, state.q, state.when !== 'any'].filter(Boolean).length;
   $('#fcount').textContent = nf || '';
   $('#reset').classList.toggle('hide', !(nf || state.day !== 'all'));
   try { const {q, ...keep} = state; localStorage.setItem('drw3', JSON.stringify(keep)); } catch (e) {}
@@ -200,7 +225,19 @@ $('#onl').onchange = e => { state.online = e.target.checked; render(); };
 $('#sort').onchange = e => { state.sort = e.target.value; render(); };
 $('#hood').onchange = e => { state.hood = e.target.value; render(); };
 $('#cuisine').onchange = e => { state.cuisine = e.target.value; render(); };
+$('#vibe').onchange = e => { state.vibe = e.target.value; render(); };
 let qt; $('#q').oninput = e => { clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value.trim().toLowerCase(); render(); }, 120); };
-$('#reset').onclick = () => { Object.assign(state, {day: 'all', open: false, online: false, hood: '', cuisine: '', when: 'any', q: ''}); $('#q').value = ''; render(); };
-$('#fbtn').onclick = () => { const b = $('.bar'), o = !b.classList.contains('open'); b.classList.toggle('open', o); $('#fbtn').setAttribute('aria-expanded', o); };
+$('#reset').onclick = () => { Object.assign(state, {day: 'all', open: false, online: false, hood: '', cuisine: '', vibe: '', when: 'any', q: ''}); $('#q').value = ''; render(); };
+$('#fbtn').onclick = () => { const b = $('.bar'), o = !b.classList.contains('open'); b.classList.toggle('open', o); $('#fbtn').setAttribute('aria-expanded', o); if (o) Kit.slide($('.seg.when'), null, false); };
+// Tap a photo (card carousel or list thumb) -> full-screen viewer with caption + credit.
+document.querySelector('main').addEventListener('click', e => {
+  const img = e.target.closest('.slides img, .r-th img'); if (!img) return;
+  const box = img.closest('.ph, .r-th'), name = box.dataset.name, v = D.venues.find(x => x.name === name); if (!v) return;
+  const live = [...(box.querySelectorAll('.slides img').length ? box.querySelectorAll('.slides img') : [])].map(x => x.getAttribute('src'));
+  const srcs = live.length ? live : (v.imgs || []).slice(0, 5);
+  const i = Math.max(0, srcs.indexOf(img.getAttribute('src')));
+  const via = v.img_src || D.platforms[v.platform] || '';
+  Kit.open(srcs, i, {title: v.name, credit: [v.name, via ? 'via ' + via : ''].filter(Boolean).join(' '), href: v.url || v.website});
+});
+Kit.buzzOn('.time, .book, .mini.has, .strip button, .days button, .seg button');
 render();

@@ -42,6 +42,9 @@ Status key: ✅ done · 🔨 in progress · ⏳ blocked/waiting · ⬜ not start
 - ✅ Photo **carousel** per card (swipe + arrows + dots).
 - ✅ **Compact list view** toggle (one row per venue: thumb, score, 9-day open counts, Book button).
 - ✅ Refined look: serif display headings, warm palette, sticky frosted toolbar.
+- ✅ **Premium/tactile pass (Nov 19)**, shared with the trip plan via the `KIT_CSS` / `KIT_JS` block in `render.py` (trip/index.html carries a verbatim copy between `kit:start` / `kit:end`): motion tokens + press/hover feedback, static film grain + slow ambient header glow, sliding selection pills (page switcher, Restaurants/Bars, time of night, view, day chips), staggered fade-up on render, photo shimmer + fade-in, count-up (open times, Beli circles once), photo lightbox (swipe, Esc/Back/swipe-down), haptic tick on phones. All `prefers-reduced-motion` guarded.
+- ✅ Page switcher is **Plan | Tables | Map** on every page (Map → `../map/`).
+- ✅ Vibe profile from optional `vibes.json` (food line, vibe sentence, tags, price · crowd · energy, heads-up; list shows price · energy), a **Vibe** filter derived from tags/energy/crowd, vibe text searchable. Missing file or venue = omitted.
 
 ### 1.5 Page: booking (must be obvious)
 - ✅ Big primary button on every card: "Book on Resy / OpenTable / SevenRooms / Tock →", or "Call to book", "Walk-in only", "Closed".

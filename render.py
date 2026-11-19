@@ -31,6 +31,7 @@ def load_json(p: Path, default):
 def build_data(res: dict) -> dict:
     meta = {v["name"]: v for v in load_json(HERE / "venues.json", [])}
     media = load_json(HERE / "media.json", {})
+    vibes = load_json(HERE / "vibes.json", {})  # optional; keyed by exact venue name
     beli = {}
     try:  # one line per venue from the phone pull; later lines win
         for line in (HERE / "beli_avgs.jsonl").read_text().splitlines():
@@ -53,6 +54,8 @@ def build_data(res: dict) -> dict:
                                   else (f"{rt:,}" if rt else None))
             m["beli_type"] = b.get("beli_type")
         md = media.get(r["name"], {})
+        vb = vibes.get(r["name"]) if isinstance(vibes, dict) else None
+        vb = vb if isinstance(vb, dict) else {}
         venues.append({
             "name": r["name"],
             "kind": m.get("kind") or r.get("kind") or "restaurant",
@@ -79,6 +82,8 @@ def build_data(res: dict) -> dict:
             "slots": r.get("slots", {}),
             "day_notes": r.get("day_notes", {}),
             "skip": r.get("skip_reason"),
+            "vibe": {k: vb[k] for k in ("food", "vibe", "tags", "crowd", "energy", "price", "dress", "good_for", "heads_up")
+                     if vb.get(k)} or None,
             "checked": r.get("checked_at", ""),
         })
     return {"generated_at": res["generated_at"], "party": res.get("party", 4),
@@ -89,9 +94,13 @@ def build_data(res: dict) -> dict:
 CSS = r"""
 :root{--bg:#f6f3ee;--paper:#fffdf9;--ink:#1c1a17;--soft:#6b655c;--faint:#a39c91;--line:#e7e1d6;
 --accent:#a2382b;--accent-ink:#fff;--open:#1f6b46;--openbg:#e8f2ea;--chip:#f0ebe2;--shadow:0 1px 2px rgba(40,30,20,.06),0 8px 24px -12px rgba(40,30,20,.18);
---gold:#b0862f;--r:16px}
+--gold:#b0862f;--r:16px;
+--k-surface:var(--paper);--k-ink:var(--ink);--k-soft:var(--soft);--k-line:var(--line);--k-shadow:var(--shadow);
+--k-shadow-lift:0 2px 4px rgba(40,30,20,.06),0 18px 36px -16px rgba(40,30,20,.32);
+--k-glow1:rgba(162,56,43,.15);--k-glow2:rgba(176,134,47,.17);--k-grain:.05}
 @media (prefers-color-scheme:dark){:root{--bg:#121110;--paper:#1b1a18;--ink:#f1ece4;--soft:#aaa396;--faint:#6f695f;
---line:#2c2a26;--accent:#e0705d;--accent-ink:#1a0f0c;--open:#7fd3a4;--openbg:#18291f;--chip:#24221f;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);--gold:#d9b25e}}
+--line:#2c2a26;--accent:#e0705d;--accent-ink:#1a0f0c;--open:#7fd3a4;--openbg:#18291f;--chip:#24221f;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);--gold:#d9b25e;
+--k-shadow-lift:0 2px 4px rgba(0,0,0,.35),0 20px 40px -16px rgba(0,0,0,.75);--k-glow1:rgba(224,112,93,.11);--k-glow2:rgba(217,178,94,.09);--k-grain:.07}}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 a{color:inherit}
@@ -108,8 +117,6 @@ h1{font-size:clamp(40px,7vw,68px);line-height:1;margin:8px 0 10px}
 .seg{display:inline-flex;background:var(--chip);border-radius:999px;padding:3px}
 .seg button{border:0;background:none;color:var(--soft);font:inherit;font-weight:500;padding:7px 14px;border-radius:999px;cursor:pointer}
 .seg button.on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
-.sitenav{margin-bottom:18px}.sitenav a{text-decoration:none;color:var(--soft);font-weight:500;font-size:13px;padding:6px 16px;border-radius:999px}
-.sitenav a.on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}.sitenav a:not(.on):hover{color:var(--ink)}
 .days{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1 1 380px;min-width:0}
 .days::-webkit-scrollbar{display:none}
 .days button{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-size:13px;
@@ -194,6 +201,31 @@ font-weight:650;font-size:15px;padding:12px 14px;border-radius:12px;transition:f
 font-weight:550;padding:0 13px;border-radius:12px;background:var(--paper)}
 .sbtn:hover{border-color:var(--ink)}
 .hide{display:none!important}
+/* tactile pass */
+.seg{position:relative}.seg button{position:relative;z-index:1;transition:color var(--dur-2) var(--ease-out),transform var(--dur-2) var(--ease-spring)}
+.seg.kit-on button.on{background:none;box-shadow:none}
+.seg .kit-ind{background:var(--paper);border-radius:999px;box-shadow:var(--shadow)}
+.days{position:relative}.days button{position:relative;z-index:1;transition:color var(--dur-2) var(--ease-out),border-color var(--dur-2),transform var(--dur-2) var(--ease-spring)}
+.days.kit-on button{background:transparent}.days.kit-on button.on{border-color:transparent}
+.days .kit-ind{background:var(--ink);border-radius:10px;box-shadow:0 4px 12px -4px rgba(0,0,0,.35)}
+.card,.row{transition:transform var(--dur-3) var(--ease-out),box-shadow var(--dur-3) var(--ease-out)}
+.card:hover{transform:none}
+@media (hover:hover){.card:hover,.row:hover{transform:translateY(-3px);box-shadow:var(--k-shadow-lift)}}
+.time:hover{transform:translateY(-1px)}
+.book:active{transform:scale(.97)}
+.slides img,.r-th img{cursor:zoom-in}
+.r-th{position:relative}
+.n.kit-num,.pill.kit-num{font-variant-numeric:tabular-nums}
+/* vibe profile */
+.food{color:var(--ink);font-size:13.5px;font-weight:500;margin-top:3px}
+.vmeta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;color:var(--soft)}
+.vmeta b{font-weight:650;color:var(--ink);letter-spacing:.03em}
+.vmeta span+span::before{content:"·";margin-right:10px;color:var(--faint)}
+.vtags{display:flex;flex-wrap:wrap;gap:5px}
+.vtag{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);
+border-radius:999px;padding:2px 8px}
+.heads{margin:0;font-size:12px;color:var(--soft);font-style:italic;padding-left:9px;border-left:2px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.r-vibe{color:var(--soft);font-size:12px;white-space:nowrap}
 .list{display:flex;flex-direction:column;gap:8px}
 .row{display:grid;grid-template-columns:26px 56px minmax(0,1fr) 40px auto 196px;grid-template-areas:"rk th mn sc dy ac";align-items:center;gap:12px;
 background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:8px 12px;box-shadow:var(--shadow)}
@@ -233,6 +265,247 @@ foot,footer{display:block;max-width:1240px;margin:0 auto;padding:10px 20px 50px;
 """
 
 
+# Shared tactile layer. trip/index.html carries a verbatim copy between the kit:start / kit:end markers.
+KIT_CSS = r"""
+/* kit:start — shared "premium" layer for the Dallas pages (render.py is the source; trip/index.html carries a copy) */
+:root{--ease-out:cubic-bezier(.2,.8,.2,1);--ease-in-out:cubic-bezier(.65,0,.35,1);--ease-spring:cubic-bezier(.34,1.4,.64,1);
+--dur-1:150ms;--dur-2:220ms;--dur-3:280ms}
+body{isolation:isolate}
+/* ambient header glow: two soft blobs drifting on the compositor (transform only) */
+.kit-glow{position:absolute;top:0;left:0;right:0;height:560px;z-index:-1;overflow:hidden;pointer-events:none;
+-webkit-mask-image:linear-gradient(#000 35%,transparent);mask-image:linear-gradient(#000 35%,transparent)}
+.kit-glow::before,.kit-glow::after{content:"";position:absolute;width:780px;height:780px;border-radius:50%;will-change:transform}
+.kit-glow::before{top:-430px;left:-240px;background:radial-gradient(closest-side,var(--k-glow1),transparent);animation:kitDriftA 26s var(--ease-in-out) infinite alternate}
+.kit-glow::after{top:-470px;right:-300px;background:radial-gradient(closest-side,var(--k-glow2),transparent);animation:kitDriftB 34s var(--ease-in-out) infinite alternate}
+@keyframes kitDriftA{to{transform:translate3d(220px,70px,0) scale(1.12)}}
+@keyframes kitDriftB{to{transform:translate3d(-260px,90px,0) scale(.92)}}
+/* static film grain */
+.kit-grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:var(--k-grain,.05);mix-blend-mode:overlay;background-size:140px 140px;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* page switcher: Plan | Tables | Map (identical on every page) */
+.switch{position:relative;display:inline-flex;gap:2px;padding:3px;margin:0 0 18px;border:1px solid var(--k-line);border-radius:999px;
+background:var(--k-surface);box-shadow:var(--k-shadow);font:600 13px/1.2 Inter,system-ui,-apple-system,sans-serif}
+.switch a{position:relative;z-index:1;padding:6px 16px;border-radius:999px;text-decoration:none;color:var(--k-soft);
+transition:color var(--dur-2) var(--ease-out),transform var(--dur-2) var(--ease-spring)}
+.switch a[aria-current="page"]{color:var(--k-surface)}
+.switch:not(.kit-on) a[aria-current="page"]{background:var(--k-ink)}
+.switch a:not([aria-current]):hover{color:var(--k-ink)}
+.switch .kit-ind{background:var(--k-ink);border-radius:999px;box-shadow:0 2px 8px -2px rgba(0,0,0,.25)}
+.switch:has(.kit-go) a[aria-current="page"]{color:var(--k-soft)}
+.switch a.kit-go{color:var(--k-surface)}
+/* sliding selection pill (generic) */
+.kit-ind{position:absolute;left:0;top:0;z-index:0;pointer-events:none;opacity:0;
+transition:transform var(--dur-3) var(--ease-spring),width var(--dur-3) var(--ease-spring),height var(--dur-3) var(--ease-spring),opacity var(--dur-1) linear}
+/* press + hover */
+.kit-tap{transition:transform var(--dur-2) var(--ease-spring),box-shadow var(--dur-2) var(--ease-out),background-color var(--dur-1),color var(--dur-1),border-color var(--dur-1),filter var(--dur-1)}
+.kit-tap:active{transform:scale(.97);transition-duration:90ms}
+@media (hover:hover){.kit-lift:hover{transform:translateY(-2px);box-shadow:var(--k-shadow-lift)}.kit-lift:active{transform:translateY(-1px) scale(.97)}}
+/* staggered fade-up */
+.kit-rv{animation:kitUp 340ms var(--ease-out) both;animation-delay:calc(var(--kit-i,0) * 28ms)}
+@keyframes kitUp{from{opacity:0;transform:translate3d(0,10px,0)}}
+/* photo skeleton shimmer + fade-in */
+.kit-load::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.16) 50%,transparent 70%);animation:kitShimmer 1.3s linear infinite}
+@keyframes kitShimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.kit-img{opacity:0;transition:opacity 420ms var(--ease-out)}
+.kit-img.kit-in{opacity:1}
+/* lightbox */
+.kit-lb{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;background:rgba(14,11,9,.95);
+opacity:0;visibility:hidden;transition:opacity var(--dur-3) var(--ease-out),visibility 0s linear var(--dur-3)}
+.kit-lb.open{opacity:1;visibility:visible;transition:opacity var(--dur-3) var(--ease-out)}
+.kit-lb-stage{position:relative;flex:1;min-height:0;transition:transform var(--dur-3) var(--ease-spring)}
+.kit-lb-track{position:absolute;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;
+overscroll-behavior:contain;touch-action:pan-x}
+.kit-lb-track::-webkit-scrollbar{display:none}
+.kit-lb-slide{flex:0 0 100%;min-width:100%;height:100%;scroll-snap-align:center;scroll-snap-stop:always;display:flex;align-items:center;justify-content:center;
+padding:calc(60px + env(safe-area-inset-top)) 16px 8px}
+.kit-lb-slide img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 24px 70px -24px rgba(0,0,0,.85);
+transform:scale(.97);transition:opacity 420ms var(--ease-out),transform var(--dur-3) var(--ease-out)}
+.kit-lb-slide img.kit-in{transform:none}
+.kit-lb-cap{color:#f3eee6;text-align:center;padding:12px 16px calc(18px + env(safe-area-inset-bottom));font:14px/1.45 Inter,system-ui,sans-serif}
+.kit-lb-cap b{display:block;font:400 26px/1.1 "Instrument Serif",Fraunces,Georgia,serif;letter-spacing:-.01em}
+.kit-lb-cap .n{font-variant-numeric:tabular-nums;color:rgba(243,238,230,.75);font-size:13px}
+.kit-lb-cap small{display:block;margin-top:4px;color:rgba(243,238,230,.55);font-size:12px}
+.kit-lb-cap a{color:inherit}
+.kit-lb button{position:absolute;z-index:2;border:0;border-radius:50%;background:rgba(255,255,255,.13);color:#fff;cursor:pointer;
+width:44px;height:44px;display:grid;place-items:center;font:400 26px/1 system-ui,sans-serif;padding:0 0 3px;
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.kit-lb button:hover{background:rgba(255,255,255,.22)}
+.kit-lb-x{top:calc(12px + env(safe-area-inset-top));right:12px}
+.kit-lb-p,.kit-lb-n{top:50%;margin-top:-22px}.kit-lb-p{left:14px}.kit-lb-n{right:14px}
+@media (hover:none){.kit-lb-p,.kit-lb-n{display:none}}
+.kit-lb[data-one] .kit-lb-p,.kit-lb[data-one] .kit-lb-n{display:none}
+html.kit-lock{overflow:hidden}
+@media (prefers-reduced-motion:reduce){
+.kit-glow::before,.kit-glow::after,.kit-load::before,.kit-rv{animation:none}
+.kit-ind,.kit-lb-stage,.kit-lb-slide img{transition:none}
+.kit-tap:active,.kit-lift:hover,.kit-lift:active{transform:none}}
+/* kit:end */
+"""
+
+KIT_JS = r"""
+// kit:start — shared tactile layer (render.py is the source; trip/index.html carries a copy)
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)');
+  const still = () => RM.matches;
+  const buzz = () => { try { navigator.vibrate && navigator.vibrate(8); } catch (e) {} };
+
+  // Sliding selection pill. The indicator survives innerHTML re-renders: it is re-inserted at its old spot, then animated.
+  function place(ind, p, anim) {
+    if (!anim) ind.style.transition = 'none';
+    ind.style.width = p.w + 'px'; ind.style.height = p.h + 'px';
+    ind.style.transform = `translate3d(${p.x}px,${p.y}px,0)`; ind.style.opacity = 1;
+    if (!anim) { void ind.offsetWidth; ind.style.transition = ''; }
+  }
+  function slide(box, target, anim = true) {
+    if (!box) return;
+    let ind = box._kInd;
+    if (!ind) {
+      ind = box._kInd = document.createElement('span');
+      ind.className = 'kit-ind'; ind.setAttribute('aria-hidden', 'true');
+      box.classList.add('kit-on');
+      if ('ResizeObserver' in window) new ResizeObserver(() => slide(box, null, false)).observe(box);
+    }
+    if (ind.parentNode !== box) { box.prepend(ind); if (box._kPos) place(ind, box._kPos, false); }
+    const a = target || box.querySelector('.kit-go') || box.querySelector('.on,[aria-current="page"],[aria-selected="true"]');
+    if (!a) { ind.style.opacity = 0; box._kPos = null; return; }
+    if (!a.offsetWidth) return;                       // hidden (collapsed filters); the ResizeObserver catches it later
+    const p = {x: a.offsetLeft, y: a.offsetTop, w: a.offsetWidth, h: a.offsetHeight};
+    place(ind, p, anim && !!box._kPos && !still());
+    box._kPos = p;
+    if (box.scrollWidth > box.clientWidth + 2) {     // keep the chosen chip in view in scrolling rows
+      const l = box.scrollLeft, r = l + box.clientWidth;
+      if (p.x < l || p.x + p.w > r) box.scrollTo({left: p.x - (box.clientWidth - p.w) / 2, behavior: still() ? 'auto' : 'smooth'});
+    }
+  }
+
+  // Staggered fade-up.
+  function reveal(els, cap = 12) {
+    if (still()) return;
+    let i = 0;
+    for (const el of els) {
+      el.style.setProperty('--kit-i', Math.min(i++, cap));
+      el.classList.add('kit-rv');
+      el.addEventListener('animationend', function done(e) { if (e.target === el) { el.classList.remove('kit-rv'); el.removeEventListener('animationend', done); } });
+    }
+  }
+
+  // Count-up (text only, rAF, no layout reads).
+  function count(el, to, {dec = 0, dur = 900, from = 0} = {}) {
+    const fmt = x => dec ? x.toFixed(dec) : Math.round(x).toLocaleString('en-US');
+    if (still()) { el.textContent = fmt(to); return; }
+    const t0 = performance.now();
+    const f = t => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (to - from) * e); if (k < 1) requestAnimationFrame(f); };
+    el.textContent = fmt(from); requestAnimationFrame(f);
+  }
+  const seen = new Set();
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return; io.unobserve(e.target);
+    const el = e.target; count(el, +el.dataset.kitTo, {dec: +el.dataset.kitDec || 0, dur: 750});
+  }), {threshold: .6}) : null;
+  // Count once per key, the first time it scrolls into view (re-renders don't replay it).
+  function countOnce(el, to, key, dec = 1) {
+    if (!io || seen.has(key) || still()) return;
+    seen.add(key); el.dataset.kitTo = to; el.dataset.kitDec = dec; io.observe(el);
+  }
+
+  // Photo fade-in once loaded; drops the shimmer from its frame.
+  window.kitImg = img => { img.classList.add('kit-in'); const f = img.closest('.kit-load'); if (f) f.classList.remove('kit-load'); };
+
+  // Lightbox: swipe / arrows between photos; Esc, Back, or swipe down closes.
+  let lb, track, stage, cap, last = null, items = [], meta = {};
+  function build() {
+    lb = document.createElement('div'); lb.className = 'kit-lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'Photos');
+    lb.innerHTML = '<div class="kit-lb-stage"><div class="kit-lb-track"></div></div><div class="kit-lb-cap" aria-live="polite"></div>'
+      + '<button class="kit-lb-x" aria-label="Close">×</button><button class="kit-lb-p" aria-label="Previous photo">‹</button><button class="kit-lb-n" aria-label="Next photo">›</button>';
+    document.body.appendChild(lb);
+    stage = lb.querySelector('.kit-lb-stage'); track = lb.querySelector('.kit-lb-track'); cap = lb.querySelector('.kit-lb-cap');
+    lb.querySelector('.kit-lb-x').onclick = () => close();
+    lb.querySelector('.kit-lb-p').onclick = () => go(-1);
+    lb.querySelector('.kit-lb-n').onclick = () => go(1);
+    track.addEventListener('scroll', () => { const i = idx(); if (i !== meta.i) { meta.i = i; caption(); } }, {passive: true});
+    track.addEventListener('click', e => { if (e.target === track || e.target.classList.contains('kit-lb-slide')) close(); });
+    let sy = null, sx = 0, dy = 0, vert = false;
+    stage.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') { sy = e.clientY; sx = e.clientX; dy = 0; vert = false; } });
+    stage.addEventListener('pointermove', e => {
+      if (sy == null) return;
+      const y = e.clientY - sy, x = e.clientX - sx;
+      if (!vert) { if (Math.abs(y) < 8 && Math.abs(x) < 8) return; if (Math.abs(x) > Math.abs(y)) { sy = null; return; } vert = true; }
+      dy = Math.max(0, y); stage.style.transition = 'none';
+      stage.style.transform = `translate3d(0,${dy}px,0) scale(${1 - Math.min(dy, 400) / 2400})`;
+      lb.style.backgroundColor = `rgba(14,11,9,${(.95 * Math.max(.25, 1 - dy / 500)).toFixed(3)})`;
+    });
+    const end = () => {
+      if (sy == null && !vert) return; sy = null;
+      stage.style.transition = ''; if (vert && dy > 90) close(); else { stage.style.transform = ''; lb.style.backgroundColor = ''; }
+      vert = false; dy = 0;
+    };
+    stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
+    document.addEventListener('keydown', e => {
+      if (!lb.classList.contains('open')) return;
+      if (e.key === 'Escape') { e.preventDefault(); close(); } else if (e.key === 'ArrowRight') go(1); else if (e.key === 'ArrowLeft') go(-1);
+    });
+    addEventListener('popstate', () => { if (lb.classList.contains('open')) close(true); });
+  }
+  const idx = () => Math.round(track.scrollLeft / (track.clientWidth || 1));
+  const go = d => { const n = items.length; if (n < 2) return; const i = (idx() + d + n) % n; track.scrollTo({left: i * track.clientWidth, behavior: still() ? 'auto' : 'smooth'}); };
+  const escH = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  function caption() {
+    const n = items.length, cr = meta.credit ? `<small>Photo: ${meta.href ? `<a href="${escH(meta.href)}" target="_blank" rel="noopener">${escH(meta.credit)}</a>` : escH(meta.credit)}</small>` : '';
+    cap.innerHTML = `<b>${escH(meta.title)}</b>${n > 1 ? `<span class="n">${(meta.i || 0) + 1} / ${n}</span>` : ''}${cr}`;
+  }
+  function open(srcs, i = 0, m = {}) {
+    if (!srcs.length) return;
+    if (!lb) build();
+    items = srcs; meta = {...m, i}; last = document.activeElement;
+    lb.toggleAttribute('data-one', srcs.length < 2);
+    track.innerHTML = srcs.map((s, j) => `<div class="kit-lb-slide"><img class="kit-img" src="${escH(s)}" alt="${escH(m.title || '')} photo ${j + 1}" referrerpolicy="no-referrer" onload="kitImg(this)" ${Math.abs(j - i) > 1 ? 'loading="lazy"' : ''}></div>`).join('');
+    stage.style.transform = ''; lb.style.backgroundColor = '';
+    document.documentElement.classList.add('kit-lock');
+    lb.classList.add('open'); caption();
+    track.scrollLeft = i * track.clientWidth;
+    try { history.pushState({kitLb: 1}, ''); } catch (e) {}
+    lb.querySelector('.kit-lb-x').focus({preventScroll: true});
+    buzz();
+  }
+  function close(fromPop) {
+    if (!lb || !lb.classList.contains('open')) return;
+    if (!fromPop && history.state && history.state.kitLb) { history.back(); return; }  // popstate finishes the close
+    lb.classList.remove('open'); document.documentElement.classList.remove('kit-lock');
+    setTimeout(() => { if (!lb.classList.contains('open')) { track.innerHTML = ''; stage.style.transform = ''; lb.style.backgroundColor = ''; } }, 300);
+    if (last && last.focus) last.focus({preventScroll: true});
+  }
+
+  // Haptic tick on the taps that matter (phones that support it; silently nothing elsewhere).
+  function buzzOn(sel) { document.addEventListener('click', e => { if (e.target.closest && e.target.closest(sel)) buzz(); }, true); }
+
+  // Page switcher: the pill slides to the tapped page, then we go.
+  function switcher() {
+    document.querySelectorAll('.switch').forEach(sw => {
+      slide(sw, null, false);
+      sw.addEventListener('click', e => {
+        const a = e.target.closest('a');
+        if (!a || a.hasAttribute('aria-current') || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+        buzz(); if (still()) return;
+        e.preventDefault();
+        sw.querySelectorAll('a').forEach(x => x.classList.toggle('kit-go', x === a));
+        slide(sw, a);
+        setTimeout(() => { location.href = a.href; }, 180);
+      });
+    });
+    addEventListener('pageshow', e => { if (e.persisted) document.querySelectorAll('.switch').forEach(sw => { sw.querySelectorAll('.kit-go').forEach(x => x.classList.remove('kit-go')); slide(sw, null, false); }); });
+  }
+
+  window.Kit = {slide, reveal, count, countOnce, open, close, buzz, buzzOn, still};
+  const boot = () => {
+    switcher();
+    document.querySelectorAll('[data-count]').forEach(el => count(el, +el.dataset.count, {dur: 1100}));
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+// kit:end
+"""
+
 
 def render(res: dict) -> str:
     data = build_data(res)
@@ -247,12 +520,13 @@ def render(res: dict) -> str:
 <meta name="description" content="Open tables for {data['party']} at Dallas's best-rated restaurants and bars on Beli.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>{CSS}</style></head><body>
-<header class="top"><nav class="seg sitenav" aria-label="Pages"><a href="../trip/">Plan</a><a class="on" href="./" aria-current="page">Tables</a></nav>
+<style>{CSS}{KIT_CSS}</style></head><body>
+<div class="kit-glow" aria-hidden="true"></div><div class="kit-grain" aria-hidden="true"></div>
+<header class="top"><nav class="switch" aria-label="Pages"><a href="../trip/">Plan</a><a href="./" aria-current="page">Tables</a><a href="../map/">Map</a></nav>
 <div class="eyebrow">Dallas · Beli's best · table for {data['party']}</div>
 <h1 class="serif">Dallas Tables</h1>
 <p class="lede">Open reservations between <b>5 and 10 PM</b>, <b>{d0:%a %b} {d0.day} – {d1:%a %b} {d1.day}</b>, at the best-rated restaurants and bars on Beli,
-ranked by the Beli community average. Tap any time to jump straight to that table. <b>{total:,}</b> open times right now ·
+ranked by the Beli community average. Tap any time to jump straight to that table. <b data-count="{total}">{total:,}</b> open times right now ·
 updated {gen:%a %-I:%M %p} CT.</p></header>
 <div class="bar"><div class="bar-in">
 <div class="row1">
@@ -265,6 +539,7 @@ updated {gen:%a %-I:%M %p} CT.</p></header>
 <div class="seg when" role="group" aria-label="Time of night"><button data-when="any">Any time</button><button data-when="early" title="5–7 PM">Early</button><button data-when="prime" title="7–8:30 PM">Prime</button><button data-when="late" title="8:30 PM on">Late</button></div>
 <select id="hood" class="sel" aria-label="Area"></select>
 <select id="cuisine" class="sel" aria-label="Food"></select>
+<select id="vibe" class="sel hide" aria-label="Vibe"></select>
 <label class="tog"><input type="checkbox" id="only"> Open only</label>
 <label class="tog"><input type="checkbox" id="onl"> Book online</label>
 <input class="search" id="q" type="search" placeholder="Search name or dish" aria-label="Search">
@@ -282,6 +557,7 @@ updated {gen:%a %-I:%M %p} CT.</p></header>
 OpenTable, SevenRooms and Tock and can disappear fast. Faded, dashed times come from an older check. This page never books anything;
 every link opens the restaurant's own booking page. Photos belong to the restaurants and are shown from their own listings.</footer>
 <script id="data" type="application/json">{blob}</script>
+<script>{KIT_JS}</script>
 <script>{(HERE / "page.js").read_text()}</script></body></html>
 """
 
