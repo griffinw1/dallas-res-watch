@@ -177,11 +177,72 @@ border-top:1px solid var(--line);box-shadow:0 -14px 44px -12px rgba(0,0,0,.4)}
 .sbtn{transition:transform var(--dur-2) var(--ease-spring),border-color var(--dur-1)}.sbtn:hover{border-color:var(--ink)}.sbtn:active{transform:scale(.96)}
 .approxn{font-size:12px;color:var(--faint)}
 .hide{display:none!important}
+/* getting around: start point, travel times, route (saved places live only in this browser's localStorage) */
+.from{position:absolute;z-index:950;top:56px;left:58px;display:flex;align-items:center;gap:6px;max-width:calc(100% - 70px)}
+@media (min-width:860px){.from{max-width:calc(100% - 490px)}}
+.from .flab{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:650;color:var(--soft);background:color-mix(in srgb,var(--paper) 88%,transparent);
+ border:1px solid var(--line);border-radius:999px;padding:6px 9px;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);flex:0 0 auto}
+.from .seg{background:color-mix(in srgb,var(--paper) 88%,transparent);border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:saturate(1.4) blur(10px);
+ -webkit-backdrop-filter:saturate(1.4) blur(10px);overflow-x:auto;scrollbar-width:none;flex:0 1 auto;min-width:0;max-width:100%}
+.from .seg::-webkit-scrollbar{display:none}
+.from .seg button{display:inline-flex;align-items:center;gap:5px}
+.from .seg button.unset{color:var(--faint)}
+.from .seg .kit-ind{background:var(--accent)}
+.from .seg button.on{color:var(--accent-ink)}
+.from .seg:not(.kit-on) button.on{background:var(--accent)}
+.from svg{width:14px;height:14px;flex:0 0 auto}
+.from .rb{flex:0 0 auto;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:color-mix(in srgb,var(--paper) 88%,transparent);color:var(--ink);
+ display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.from .rb.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.from .rb[disabled]{opacity:.4;cursor:default}
+.near{position:absolute;z-index:940;top:98px;left:58px;display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;max-width:calc(100% - 70px);padding:2px 0 6px}
+@media (min-width:860px){.near{max-width:calc(100% - 490px)}}
+.near::-webkit-scrollbar{display:none}
+.near .nl{font-size:11px;font-weight:650;color:var(--soft);white-space:nowrap;background:color-mix(in srgb,var(--paper) 88%,transparent);border-radius:999px;padding:5px 9px;border:1px solid var(--line)}
+.near button{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 10px 5px 5px;font-size:12px;font-weight:550;cursor:pointer;
+ display:inline-flex;align-items:center;gap:6px;box-shadow:var(--shadow);white-space:nowrap}
+.near button b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--sc,#7a7368);font-size:10px;font-weight:700}
+.near button small{color:var(--soft);font-weight:500;font-variant-numeric:tabular-nums}
+.pmg{position:absolute;z-index:1200;top:98px;left:58px;width:min(360px,calc(100% - 24px));background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);
+ box-shadow:0 18px 50px -14px rgba(0,0,0,.45);padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px;max-height:calc(100% - 110px);overflow-y:auto}
+.pmg h3{margin:0;font-size:22px;line-height:1}
+.pmg .note{margin:0;font-size:12px;color:var(--soft);display:flex;gap:6px;align-items:center}
+.pmg .note svg{width:13px;height:13px;flex:0 0 auto;color:var(--open)}
+.pmg .row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:7px 8px 7px 10px}
+.pmg .row .nm{flex:1 1 auto;min-width:0;font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px}
+.pmg .row .nm small{color:var(--faint);font-weight:500;font-size:12px}
+.pmg .row .nm svg{width:15px;height:15px;color:var(--soft);flex:0 0 auto}
+.pmg .mini{border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:12px;font-weight:600;border-radius:9px;padding:5px 9px;cursor:pointer;white-space:nowrap}
+.pmg .mini.warn{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
+.pmg form{display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--line);padding-top:10px}
+.pmg label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.pmg input{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+.pmg input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.pmg .fa{display:flex;gap:8px}.pmg .fa .book{flex:1 1 auto;font-size:14px;padding:10px;border:0;cursor:pointer}
+.pmg .msg{font-size:12px;color:var(--soft);min-height:1em}.pmg .msg.err{color:var(--accent)}
+.pmg .x{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;border:0;background:var(--chip);color:var(--ink);font-size:18px;cursor:pointer;display:grid;place-items:center}
+.trav{display:flex;flex-direction:column;gap:4px;border:1px solid var(--line);border-radius:12px;padding:9px 11px;background:color-mix(in srgb,var(--accent) 5%,var(--paper))}
+.trav .tl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.trav .tr{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.trav .tr svg{width:16px;height:16px;color:var(--accent);flex:0 0 auto}
+.trav .tr span{color:var(--soft);font-weight:500}
+.trav .ap{font-size:11px;color:var(--faint);font-weight:500;font-style:italic}
+.trav.ld .tr{color:var(--faint)}
+.smk{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);border:2.5px solid var(--paper);box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.smk svg{width:18px;height:18px}
+.smk.me{width:20px;height:20px;background:#2f7cf6;border:3px solid #fff;position:relative}
+.smk.me::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid #2f7cf6;animation:halo 2s var(--ease-out) infinite}
+.smk.pin2{border-radius:50% 50% 50% 4px;transform:rotate(-45deg)}.smk.pin2 svg{transform:rotate(45deg)}
+.route{stroke:var(--accent)}.route-case{stroke:var(--paper)}
+.toast{position:absolute;z-index:1300;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-size:13px;padding:8px 14px;border-radius:999px;
+ box-shadow:var(--shadow);max-width:calc(100% - 32px);text-align:center;pointer-events:none}
+.empty-msg{top:142px}
 @media (max-width:640px){
+ .from{left:12px;top:54px;max-width:calc(100% - 24px)}.near{left:12px;top:94px;max-width:calc(100% - 24px)}.pmg{left:12px;top:94px}
  .bar{padding:8px 16px}.ttl{display:none}.info{display:none}
  .bar-in{gap:7px 8px}.r1{flex:1 1 100%;justify-content:space-between}
  .switch a{padding:5px 9px;font-size:12px}.seg button{padding:5px 8px;font-size:12px}.seg.when{flex:1 1 100%;display:flex}.seg.when button{flex:1;padding:5px 4px;font-size:12px}
- .days{flex:1 1 100%}.name{font-size:27px}.leaflet-control-zoom{display:none}.empty-msg{top:58px;white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 32px)}.sheet .ph{aspect-ratio:2/1}
+ .days{flex:1 1 100%}.name{font-size:27px}.leaflet-control-zoom{display:none}.empty-msg{top:138px;white-space:normal;text-align:center;width:max-content;max-width:calc(100% - 32px)}.sheet .ph{aspect-ratio:2/1}
  .bm{left:12px;top:12px}.bm button{padding:6px 10px}
  .legend{bottom:44px;left:16px;max-width:calc(100% - 32px)}.leaflet-control-attribution{font-size:9px;line-height:1.3}
  .body{padding:12px 16px 18px}
@@ -207,6 +268,10 @@ border-top:1px solid var(--line);box-shadow:0 -14px 44px -12px rgba(0,0,0,.4)}
     <button data-bm="terrain" title="Terrain"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M1 13 6 5l3 4.5L11 7l4 6Z"/></svg>Terrain</button>
     <button data-bm="sat" title="Satellite"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12"/></svg>Satellite</button>
   </div>
+  <div class="from" id="from"></div>
+  <div class="near hide" id="near" aria-label="Closest places"></div>
+  <div class="pmg hide" id="pmg" role="dialog" aria-label="Saved places"></div>
+  <div class="toast hide" id="toast" role="status"></div>
   <div class="legend" id="legend"></div>
   <div class="empty-msg hide" id="emsg"></div>
   <aside class="sheet" id="sheet" aria-live="polite" aria-label="Venue details"></aside>
@@ -331,11 +396,15 @@ function primaryBtn(v, d) {
   return `<span class="book ghost">No online booking</span>`;
 }
 function secondary(v) {
-  const dir = v.geo ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.name + ' Dallas TX')}` : '';
+  const q = encodeURIComponent(v.name + ' Dallas TX');
+  // with a start point set, Directions opens Google Maps from it (only when the viewer taps it)
+  const dir = !v.geo ? '' : (START && !isStartVenue(v)) ? `https://www.google.com/maps/dir/?api=1&origin=${START.lat.toFixed(5)},${START.lng.toFixed(5)}&destination=${q}&travelmode=driving`
+    : `https://www.google.com/maps/search/?api=1&query=${q}`;
   return [v.menu ? `<a class="sbtn" href="${esc(v.menu)}" target="_blank" rel="noopener">Menu</a>` : '',
     v.website ? `<a class="sbtn" href="${esc(v.website)}" target="_blank" rel="noopener">Site</a>` : '',
     (v.phone && v.platform !== 'phone') ? `<a class="sbtn" href="tel:${esc(v.phone)}" title="${esc(v.phone)}">Call</a>` : '',
-    dir ? `<a class="sbtn" href="${esc(dir)}" target="_blank" rel="noopener">Directions</a>` : ''].join('');
+    dir ? `<a class="sbtn" href="${esc(dir)}" target="_blank" rel="noopener">Directions</a>` : '',
+    v.geo ? (isStartVenue(v) ? `<span class="sbtn" aria-disabled="true" style="opacity:.6">Starting here</span>` : `<button class="sbtn kit-tap" data-starthere>Start here</button>`) : ''].join('');
 }
 function timesHtml(v, d) {
   const s = slotsFor(v, d), nt = v.day_notes[d] || '', stale = /^stale/.test(nt);
@@ -449,7 +518,7 @@ let solo = null;
 function unsolo() { if (!solo) return; const m = solo; solo = null; if (map.hasLayer(m)) map.removeLayer(m); if (m._inPool) cluster.addLayer(m); }
 function makeSolo(mk) { if (solo === mk) return; unsolo(); if (cluster.hasLayer(mk)) cluster.removeLayer(mk); mk.addTo(map); solo = mk; }
 const icon = v => { const p = pinHtml(v); return L.divIcon({className: 'pinw', html: p.html, iconSize: [34, 34], iconAnchor: [17, 17]}); };
-function paint(n) { const mk = markers.get(n), v = V.find(x => x.name === n); if (!mk || !v) return; mk.setIcon(icon(v)); mk.setZIndexOffset(n === selName ? 10000 : pinHtml(v).dim ? 0 : 500 + Math.round((v.avg || 0) * 20)); }
+let paint = function (n) { const mk = markers.get(n), v = V.find(x => x.name === n); if (!mk || !v) return; mk.setIcon(icon(v)); mk.setZIndexOffset(n === selName ? 10000 : pinHtml(v).dim ? 0 : 500 + Math.round((v.avg || 0) * 20)); };
 
 // Badge: with "All" days = how many nights have a table (6 nights); with one day picked = that day's open times.
 const nightsOpen = v => dates.filter(d => slotsFor(v, d).length).length;
@@ -499,6 +568,7 @@ function render(fit = true) {
     fitted = true;
   }
   if (selName) fillSheet(selName, true);
+  renderNear(false);
   try { localStorage.setItem('drwmap1', JSON.stringify(state)); } catch (e) {}
 }
 
@@ -525,6 +595,7 @@ function fillSheet(name, keepScroll) {
   <div class="body">
    <div class="hd"><div><h2 class="name serif">${esc(v.name)}</h2><div class="sub">${sub}${sub ? ' · ' : ''}${esc(plat)}</div></div>
     ${v.avg != null ? `<div class="score"><div class="l"><b>Beli avg</b>${v.ratings_label ? esc(v.ratings_label) + ' ratings' : ''}</div><div class="n" style="--sc:${scoreCol(v.avg)}">${v.avg.toFixed(1)}</div></div>` : ''}</div>
+   ${travHtml(v)}
    ${vb.food ? `<div class="food">${esc(vb.food)}</div>` : ''}
    ${vmeta ? `<div class="vmeta">${vmeta}</div>` : ''}
    ${tags ? `<div class="vtags">${tags}</div>` : ''}
@@ -538,6 +609,8 @@ function fillSheet(name, keepScroll) {
   </div>`;
   sheet.scrollTop = st;
   $('.close', sheet).onclick = closeSheet;
+  const sh = $('[data-starthere]', sheet); if (sh) sh.onclick = () => setStart({id: 'pin:' + v.name, kind: 'pin', name: v.name, lat: v.geo.lat, lng: v.geo.lng});
+  travelFor(v);
   if (online) sheet.querySelectorAll('.strip button').forEach(b => b.onclick = () => { sheetDay[name] = b.dataset.d; if (state.day !== 'all') { state.day = b.dataset.d; render(false); } else fillSheet(name, true); });
 }
 function openSheet(name) {
@@ -559,7 +632,7 @@ function openSheet(name) {
   }
 }
 function closeSheet() {
-  sheet.classList.remove('open'); sheet.style.transform = ''; const n = selName; selName = null;
+  sheet.classList.remove('open'); sheet.style.transform = ''; const n = selName; selName = null; clearRoute();
   if (n) paint(n);
   unsolo();
 }
@@ -581,11 +654,231 @@ sheet.addEventListener('touchend', () => {
   if (dy > 90 || fast) closeSheet(); else sheet.style.transform = '';
 }, {passive: true});
 
+
+// ---- getting around: start point, travel times, route ----
+// PRIVACY: saved places (Home, Saket's, custom) are typed by the viewer, geocoded in their browser and kept ONLY in
+// this device's localStorage ('drwPlaces' = [{id, kind, name, lat, lng}], no address text). Nothing here is ever
+// sent anywhere except: Nominatim (the typed address, on Save), the OSRM router (start + venue coords, on pin tap)
+// and Google Maps (when the viewer taps Directions). My location is read on tap and never stored.
+const IC = {
+  home: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5 8 3l5.5 4.5V13a.5.5 0 0 1-.5.5H9.5V10h-3v3.5H3a.5.5 0 0 1-.5-.5Z"/></svg>',
+  friend: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="5.2" r="2.6"/><path d="M3 14c.6-2.9 2.6-4.4 5-4.4s4.4 1.5 5 4.4"/></svg>',
+  me: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="4.6"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>',
+  custom: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M8 14.5s4.5-4.2 4.5-7.8a4.5 4.5 0 0 0-9 0c0 3.6 4.5 7.8 4.5 7.8Z"/><circle cx="8" cy="6.6" r="1.6"/></svg>',
+  pin: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 14.5V2.5M4 3h8l-1.8 3L12 9H4"/></svg>',
+  plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>',
+  sort: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 3v10m0 0-2-2m2 2 2-2M9 4h5M9 8h3.5M9 12h2"/></svg>',
+  car: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 10.5V8.2l1.4-3.5c.2-.4.5-.7 1-.7h6.2c.5 0 .8.3 1 .7l1.4 3.5v2.3a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5ZM2.5 8.2h11"/><circle cx="5" cy="11.5" r="1.2"/><circle cx="11" cy="11.5" r="1.2"/></svg>',
+  walk: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="2.8" r="1.4"/><path d="m6 15 1.7-4.5L10 12.5V15M7.7 10.5 8.5 6l-2.7 1.4L5 9.5M8.5 6l1.8 2.6 2.2.9"/></svg>',
+  lock: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>',
+};
+const SLOTS = [{id: 'home', kind: 'home', name: 'Home'}, {id: 'saket', kind: 'friend', name: "Saket's"}];
+const loadPlaces = () => { try { const a = JSON.parse(localStorage.getItem('drwPlaces') || '[]'); return Array.isArray(a) ? a.filter(p => p && p.id && isFinite(p.lat) && isFinite(p.lng)) : []; } catch (e) { return []; } };
+const savePlaces = a => { try { localStorage.setItem('drwPlaces', JSON.stringify(a)); } catch (e) { toast("Couldn't save on this device (private mode?)"); } };
+let places = loadPlaces();
+let START = null;            // {id, kind, name, lat, lng}
+let nearOn = false; try { nearOn = localStorage.getItem('drwNear') === '1'; } catch (e) {}
+const isStartVenue = v => !!(START && START.kind === 'pin' && START.name === v.name);
+const km = (a, b) => { const R = 6371, r = Math.PI / 180, dLa = (b.lat - a.lat) * r, dLo = (b.lng - a.lng) * r;
+  const h = Math.sin(dLa / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
+const fmtMin = m => m < 60 ? Math.max(1, Math.round(m)) + ' min' : Math.floor(m / 60) + ' h ' + String(Math.round(m % 60)).padStart(1, '0') + ' min';
+const fmtKm = k => (k < 10 ? k.toFixed(1) : Math.round(k)) + ' km';
+let toastT = 0;
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.remove('hide'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.add('hide'), 3200); }
+
+// start marker (local only)
+let startMk = null;
+function drawStart() {
+  if (startMk) { map.removeLayer(startMk); startMk = null; }
+  if (!START) return;
+  const k = START.kind, me = k === 'me';
+  const html = me ? '<div class="smk me"></div>' : `<div class="smk${k === 'pin' ? ' pin2' : ''}">${IC[k === 'friend' ? 'friend' : k === 'home' ? 'home' : k === 'pin' ? 'pin' : 'custom']}</div>`;
+  const sz = me ? 20 : 34;
+  startMk = L.marker([START.lat, START.lng], {icon: L.divIcon({className: 'pinw', html, iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2]}),
+    zIndexOffset: 20000, keyboard: false, interactive: true, alt: 'Start: ' + START.name}).addTo(map);
+  startMk.bindTooltip('Start · ' + START.name, {direction: 'top', offset: [0, -16], className: 'tip', opacity: 1});
+}
+
+// routing: OSRM public demo, only on pin tap, one request at a time, cached in memory; straight-line fallback
+const rCache = new Map(); let rQueue = Promise.resolve();
+const ck = (mode, a, b) => `${mode}|${a.lat.toFixed(5)},${a.lng.toFixed(5)}|${b.lat.toFixed(5)},${b.lng.toFixed(5)}`;
+function osrm(mode, a, b) {
+  const key = ck(mode, a, b);
+  if (rCache.has(key)) return Promise.resolve(rCache.get(key));
+  const job = rQueue.then(async () => {
+    if (rCache.has(key)) return rCache.get(key);
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 7000);
+    try {
+      const r = await fetch(`https://router.project-osrm.org/route/v1/${mode}/${a.lng.toFixed(6)},${a.lat.toFixed(6)};${b.lng.toFixed(6)},${b.lat.toFixed(6)}?overview=full&geometries=geojson`, {signal: ctl.signal});
+      const j = r.ok ? await r.json() : null, rt = j && j.code === 'Ok' && j.routes && j.routes[0];
+      if (!rt) throw 0;
+      let min = rt.duration / 60; const dk = rt.distance / 1000;
+      // the demo server answers /foot/ with car timings; never claim walking faster than ~5 km/h
+      if (mode === 'foot') min = Math.max(min, dk * 12);
+      const out = {min, km: dk, line: rt.geometry.coordinates.map(c => [c[1], c[0]]), approx: false};
+      rCache.set(key, out); return out;
+    } catch (e) { return null; } finally { clearTimeout(t); }
+  });
+  rQueue = job.catch(() => null);
+  return job;
+}
+const approxOf = (mode, a, b) => { const d = km(a, b); return {min: d * (mode === 'foot' ? 12 : 2.2), km: d, line: [[a.lat, a.lng], [b.lat, b.lng]], approx: true}; };
+let routeLy = null;
+function clearRoute() { if (routeLy) { map.removeLayer(routeLy); routeLy = null; } }
+function drawRoute(r) {
+  clearRoute(); if (!r) return;
+  routeLy = L.layerGroup([L.polyline(r.line, {className: 'route-case', weight: 8, opacity: .9, interactive: false, lineCap: 'round', lineJoin: 'round'}),
+    L.polyline(r.line, {className: 'route', weight: 4.5, opacity: .95, interactive: false, dashArray: r.approx ? '2 9' : null, lineCap: 'round', lineJoin: 'round'})]).addTo(map);
+  // refit only if part of the route sits outside the map area the card and the top controls leave free
+  const b = L.latLngBounds(r.line), sz = map.getSize(), desk = innerWidth >= 860;
+  const free = L.bounds(L.point(16, 140), L.point(sz.x - (desk ? 420 : 16), desk ? sz.y - 16 : sz.y - sheet.getBoundingClientRect().height - 12));
+  const inFree = [b.getNorthWest(), b.getSouthEast()].every(ll => free.contains(map.latLngToContainerPoint(ll)));
+  if (!inFree) map.fitBounds(b.pad(.15), {animate: !Kit.still(), maxZoom: 15,
+    paddingTopLeft: [24, 150], paddingBottomRight: [(innerWidth >= 860 ? 420 : 0) + 24, innerWidth < 860 ? Math.round(sheet.getBoundingClientRect().height) + 20 : 24]});
+}
+const travKey = v => START && v.geo ? START.id + '>' + v.name : '';
+function travHtml(v) {
+  if (!START || !v.geo) return '';
+  if (isStartVenue(v)) return `<div class="trav"><div class="tl">Getting around</div><div class="tr">${IC.pin}This is your start point<span></span></div></div>`;
+  return `<div class="trav ld" id="trav" data-k="${esc(travKey(v))}"><div class="tl">From ${esc(START.name)}</div><div class="tr">${IC.car}Working out the route…</div></div>`;
+}
+const tline = (r, mode) => `<div class="tr">${IC[mode === 'foot' ? 'walk' : 'car']}${fmtMin(r.min)} ${mode === 'foot' ? 'walk' : 'drive'}<span>· ${fmtKm(r.km)}</span>${r.approx ? '<span class="ap">approx.</span>' : ''}</div>`;
+async function travelFor(v) {
+  if (!START || !v.geo || isStartVenue(v)) { clearRoute(); return; }
+  const a = {lat: START.lat, lng: START.lng}, b = {lat: v.geo.lat, lng: v.geo.lng}, key = travKey(v);
+  const still = () => selName === v.name && travKey(v) === key;
+  let drive = await osrm('driving', a, b); if (!still()) return;
+  drive = drive || approxOf('driving', a, b);
+  let walk = null;
+  if (Math.min(km(a, b), drive.km) < 2) { walk = await osrm('foot', a, b); if (!still()) return; walk = walk || approxOf('foot', a, b); }
+  const el = document.getElementById('trav'); if (!el || el.dataset.k !== key) return;
+  el.classList.remove('ld');
+  el.innerHTML = `<div class="tl">From ${esc(START.name)}</div>${walk ? tline(walk, 'foot') + tline(drive, 'driving') : tline(drive, 'driving')}`;
+  drawRoute(walk && walk.km < 1.2 ? walk : drive);
+}
+
+// "Start from" control
+const fromEl = $('#from');
+function startOpts() {
+  const out = SLOTS.map(s => Object.assign({}, s, places.find(p => p.id === s.id) || {unset: true}));
+  places.filter(p => !SLOTS.some(s => s.id === p.id)).forEach(p => out.push(p));
+  return out;
+}
+function renderFrom() {
+  const opts = startOpts();
+  const btn = (id, kind, label, extra = '') => `<button data-st="${esc(id)}" class="kit-tap${START && START.id === id ? ' on' : ''}${extra}" aria-pressed="${!!(START && START.id === id)}">${IC[kind]}${esc(label)}</button>`;
+  fromEl.innerHTML = `<span class="flab">From</span><div class="seg" id="fromSeg" role="group" aria-label="Start from">`
+    + btn('me', 'me', 'Me')
+    + opts.map(o => btn(o.id, o.kind === 'friend' ? 'friend' : o.kind === 'home' ? 'home' : 'custom', o.name, o.unset ? ' unset' : '')).join('')
+    + (START && START.kind === 'pin' ? btn(START.id, 'pin', START.name.length > 16 ? START.name.slice(0, 15) + '…' : START.name) : '')
+    + `</div><button class="rb kit-tap" id="fromAdd" title="Saved places" aria-label="Add or edit saved places">${IC.plus}</button>`
+    + `<button class="rb kit-tap${nearOn ? ' on' : ''}" id="fromNear" title="Sort by distance" aria-label="Sort by distance" aria-pressed="${nearOn}"${START ? '' : ' disabled'}>${IC.sort}</button>`;
+  Kit.slide($('#fromSeg'), null, false);
+  renderNear();
+}
+L.DomEvent.disableClickPropagation(fromEl); L.DomEvent.disableScrollPropagation(fromEl);
+fromEl.addEventListener('click', e => {
+  const b = e.target.closest('[data-st]');
+  if (b) {
+    const id = b.dataset.st;
+    if (START && START.id === id) return setStart(null);
+    if (id === 'me') return locate(b);
+    const p = places.find(x => x.id === id);
+    if (p) return setStart(p);
+    return openManage(id);
+  }
+  if (e.target.closest('#fromAdd')) return $('#pmg').classList.contains('hide') ? openManage() : closeManage();
+  if (e.target.closest('#fromNear') && START) { nearOn = !nearOn; try { localStorage.setItem('drwNear', nearOn ? '1' : '0'); } catch (er) {} renderFrom(); }
+});
+function locate(b) {
+  if (!navigator.geolocation) return toast('Location isn’t available in this browser');
+  b.classList.add('unset'); toast('Finding you…');
+  navigator.geolocation.getCurrentPosition(p => { toast('Starting from your location'); setStart({id: 'me', kind: 'me', name: 'your location', lat: p.coords.latitude, lng: p.coords.longitude}); },
+    err => { b.classList.remove('unset'); toast(err.code === 1 ? 'Location permission was declined' : 'Couldn’t find your location'); }, {enableHighAccuracy: true, timeout: 12000, maximumAge: 60000});
+}
+function setStart(p) {
+  START = p ? {id: p.id, kind: p.kind, name: p.name, lat: +p.lat, lng: +p.lng} : null;
+  try { if (START && START.kind !== 'me' && START.kind !== 'pin') localStorage.setItem('drwStart', START.id); else localStorage.removeItem('drwStart'); } catch (e) {}
+  if (!START) clearRoute();
+  drawStart(); renderFrom(); render(false);
+  if (START && !selName && !map.getBounds().contains([START.lat, START.lng])) map.panTo([START.lat, START.lng], {animate: !Kit.still()});
+}
+// nearest strip + pins z-ordered by distance when "Sort by distance" is on
+function renderNear(repaint = true) {
+  const el = $('#near'), show = nearOn && START;
+  el.classList.toggle('hide', !show);
+  if (repaint) markers.forEach((mk, n) => paint(n));
+  if (!show) return;
+  const pool = V.filter(v => v.geo && (state.kind === 'all' || v.kind === state.kind) && !isStartVenue(v))
+    .map(v => ({v, d: km(START, v.geo)})).sort((a, b) => a.d - b.d).slice(0, 5);
+  el.innerHTML = `<span class="nl">Closest to ${esc(START.name)}</span>` + pool.map(({v, d}) =>
+    `<button class="kit-tap" data-near="${esc(v.name)}"><b style="--sc:${scoreCol(v.avg)}">${v.avg != null ? v.avg.toFixed(1) : esc(v.name.replace(/^the\s+/i, '')[0])}</b>${esc(v.name)}<small>${fmtKm(d)}</small></button>`).join('');
+  el.querySelectorAll('[data-near]').forEach(b => b.onclick = () => openSheet(b.dataset.near));
+}
+L.DomEvent.disableClickPropagation($('#near')); L.DomEvent.disableScrollPropagation($('#near'));
+
+// manage sheet: add / edit / delete saved places
+const pmg = $('#pmg');
+L.DomEvent.disableClickPropagation(pmg); L.DomEvent.disableScrollPropagation(pmg);
+let editId = null;
+function openManage(id) {
+  editId = id || null; pmg.classList.remove('hide'); paintManage();
+  const inp = $('#pmAddr', pmg); if (inp && editId) inp.focus();
+}
+function closeManage() { pmg.classList.add('hide'); editId = null; }
+function paintManage(msg = '', err = false) {
+  const opts = startOpts();
+  const cur = editId ? (opts.find(o => o.id === editId) || {id: editId, kind: 'custom', name: ''}) : null;
+  const isSlot = cur && SLOTS.some(s => s.id === cur.id);
+  pmg.innerHTML = `<button class="x" aria-label="Close">×</button><h3 class="serif">Saved places</h3>
+   <p class="note">${IC.lock}Saved only on this device, never on the site.</p>
+   ${opts.map(o => `<div class="row"><div class="nm">${IC[o.kind === 'friend' ? 'friend' : o.kind === 'home' ? 'home' : 'custom']}${esc(o.name)}${o.unset ? '<small>not set</small>' : ''}</div>
+     <button class="mini" data-ed="${esc(o.id)}">${o.unset ? 'Add' : 'Edit'}</button>${o.unset ? '' : `<button class="mini warn" data-del="${esc(o.id)}">Delete</button>`}</div>`).join('')}
+   ${cur ? '' : `<button class="mini" data-ed="new" style="align-self:flex-start">+ Add a place</button>${msg ? `<div class="msg">${esc(msg)}</div>` : ''}`}
+   ${cur ? `<form id="pmForm" autocomplete="off">
+     ${isSlot ? `<div class="lab">${esc(cur.name)}</div>` : `<label for="pmName">Name</label><input id="pmName" maxlength="24" value="${esc(cur.name || '')}" placeholder="e.g. Office" required>`}
+     <label for="pmAddr">Address</label><input id="pmAddr" inputmode="search" autocomplete="off" placeholder="Street address or place, Dallas" required>
+     <div class="fa"><button class="book kit-tap" type="submit">Save</button><button class="mini" type="button" data-cancel>Cancel</button></div>
+     <div class="msg${err ? ' err' : ''}">${esc(msg) || 'Looked up once with OpenStreetMap when you tap Save. Only the map point is kept.'}</div></form>` : ''}`;
+  $('.x', pmg).onclick = closeManage;
+  pmg.querySelectorAll('[data-ed]').forEach(b => b.onclick = () => { editId = b.dataset.ed === 'new' ? 'c' + Date.now().toString(36) : b.dataset.ed; paintManage(); const i = $('#pmName', pmg) || $('#pmAddr', pmg); i && i.focus(); });
+  pmg.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+    if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Sure?'; return; }
+    const id = b.dataset.del; places = places.filter(p => p.id !== id); savePlaces(places);
+    if (START && START.id === id) setStart(null); else renderFrom();
+    if (editId === id) editId = null; paintManage('Deleted.');
+  });
+  const c = $('[data-cancel]', pmg); if (c) c.onclick = () => { editId = null; paintManage(); };
+  const f = $('#pmForm', pmg); if (f) f.onsubmit = async e => {
+    e.preventDefault();
+    const nameIn = $('#pmName', pmg), q = $('#pmAddr', pmg).value.trim(), name = isSlot ? cur.name : (nameIn.value.trim() || 'Place');
+    if (q.length < 3) return paintManageMsg('Type an address first.', true);
+    paintManageMsg('Looking it up…');
+    let hit = null;
+    try {
+      const ctl = new AbortController(); setTimeout(() => ctl.abort(), 9000);
+      const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&q=' + encodeURIComponent(q), {signal: ctl.signal, headers: {'Accept-Language': 'en'}});
+      const j = r.ok ? await r.json() : null; hit = j && j[0];
+    } catch (er) {}
+    if (!hit) return paintManageMsg('Couldn’t find that address. Try adding the city or ZIP.', true);
+    const p = {id: cur.id, kind: isSlot ? cur.kind : 'custom', name, lat: +(+hit.lat).toFixed(5), lng: +(+hit.lon).toFixed(5)};
+    places = places.filter(x => x.id !== p.id).concat(p); savePlaces(places);
+    editId = null; setStart(p); paintManage(`Saved ${name}. Now starting from there.`);
+  };
+}
+const paintManageMsg = (t, err) => { const m = $('.msg', pmg); if (m) { m.textContent = t; m.classList.toggle('err', !!err); } };
+addEventListener('keydown', e => { if (e.key === 'Escape' && !pmg.classList.contains('hide')) { closeManage(); e.stopImmediatePropagation(); } }, true);
+// pins nearer the start sit on top when sorting by distance
+const _paint = paint;
+paint = function (n) { _paint(n); if (!(nearOn && START)) return; const mk = markers.get(n), v = V.find(x => x.name === n); if (!mk || !v || n === selName) return;
+  mk.setZIndexOffset(5000 - Math.round(km(START, v.geo) * 100)); };
+try { const sid = localStorage.getItem('drwStart'); const p = sid && places.find(x => x.id === sid); if (p) { START = {id: p.id, kind: p.kind, name: p.name, lat: +p.lat, lng: +p.lng}; drawStart(); } } catch (e) {}
+renderFrom();
 document.querySelectorAll('.seg.kind button,.seg.when button').forEach(b => b.classList.add('kit-tap'));
 document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { state.kind = b.dataset.k; if (selName && !(state.kind === 'all' || V.find(v => v.name === selName).kind === state.kind)) closeSheet(); render(); });
 document.querySelectorAll('[data-when]').forEach(b => b.onclick = () => { state.when = b.dataset.when; render(false); });
 render();
-window.__map = {map, V, state, openSheet, closeSheet, missing, cluster, markers, get base() { return base; }};
+window.__map = {map, V, state, openSheet, closeSheet, setStart, get start() { return START; }, missing, cluster, markers, get base() { return base; }};
 })();
 </script>
 </body>
