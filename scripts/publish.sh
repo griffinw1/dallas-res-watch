@@ -21,11 +21,21 @@ if [ -n "$HAS_REMOTE" ] && [ -z "${NO_PUSH:-}" ]; then git pull -q --rebase --au
 [ -f results.json ] && cp results.json .prev.json || echo '{}' > .prev.json
 
 "$PY" check.py --platforms "$OWN" "$@"
+# Other party sizes (2,3,5-8) -> results_pN.json. Resy/SevenRooms/Tock every run; OpenTable
+# rate-limits hard, so it gets ONE size per run, rotating every 3 h. NO_SIZES=1 skips this.
+if [ -z "${NO_SIZES:-}" ]; then
+  SIZES=(2 3 5 6 7 8); OTS=${SIZES[$(( ($(date +%s) / 10800) % 6 ))]}
+  for n in "${SIZES[@]}"; do
+    PL=$(echo "$OWN" | tr ',' '\n' | grep -vx opentable | paste -sd, - || true)
+    [ "$n" = "$OTS" ] && PL="$OWN"
+    [ -n "$PL" ] && { "$PY" check.py --platforms "$PL" --party "$n" --out "results_p$n.json" --delay 0.4-0.9 "$@" | tail -1 || true; }
+  done
+fi
 "$PY" render.py
 "$PY" diff.py .prev.json results.json
 [ -n "${GITHUB_STEP_SUMMARY:-}" ] && "$PY" diff.py .prev.json results.json --markdown >> "$GITHUB_STEP_SUMMARY"
 
-git add results.json site/index.html
+git add results.json site/index.html results_p*.json 2>/dev/null || git add results.json site/index.html
 git commit -qm "availability: $OWN $(date -u +%FT%H:%MZ)" || { echo "nothing changed"; exit 0; }
 [ -z "$HAS_REMOTE" ] || [ -n "${NO_PUSH:-}" ] && { echo "committed locally (no push)"; exit 0; }
 

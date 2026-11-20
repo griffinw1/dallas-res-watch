@@ -1,6 +1,18 @@
 // Client script for site/index.html (inlined by render.py). Data comes from <script id="data">.
 const D = JSON.parse(document.getElementById('data').textContent);
-const P = D.party, dates = D.dates;
+let P = D.party; const dates = D.dates;
+D.venues.forEach(v => { v._base = [v.slots, v.status, v.day_notes]; });
+// Swap every venue's slots to the chosen party size (4 is the main check; others come from by_size).
+const applyParty = n => {
+  P = n; const src = n === D.party ? null : (D.by_size || {})[n];
+  D.venues.forEach(v => {
+    if (n === D.party) { [v.slots, v.status, v.day_notes] = v._base; return; }
+    const x = src && src.v[v.name];
+    if (x) { [v.slots, v.status, v.day_notes] = [x[0] || {}, x[1] || {}, x[2] || {}]; }
+    else { v.slots = {}; v.status = Object.fromEntries(dates.map(d => [d, 'error:not checked yet'])); v.day_notes = {}; }
+  });
+  const pn = document.getElementById('pnum'); if (pn) pn.textContent = n;
+};
 const $ = (s, e = document) => e.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 const dow = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', {weekday: 'short'});
@@ -14,6 +26,8 @@ const WINDOWS = {any: [0, 1e9], early: [0, 18 * 60 + 59], prime: [19 * 60, 20 * 
 let state = {kind: 'restaurant', day: 'all', open: false, q: '', sort: 'score', when: 'any', hood: '', cuisine: '', vibe: '', online: false, view: 'cards'};
 try { Object.assign(state, JSON.parse(localStorage.getItem('drw3') || '{}')); state.q = ''; } catch (e) {}
 if (state.day !== 'all' && !dates.includes(state.day)) state.day = 'all';
+if (!(state.party >= 2 && state.party <= 8)) state.party = D.party;
+applyParty(state.party);
 const sel = {};  // per-card chosen day
 
 const slotsFor = (v, d) => { const [a, b] = WINDOWS[state.when] || WINDOWS.any; return (v.slots[d] || []).filter(t => { const m = mins(t); return m == null || (m >= a && m <= b); }); };
@@ -69,7 +83,7 @@ function secondary(v) {
 function timesHtml(v, d) {
   const s = slotsFor(v, d), nt = (v.day_notes || {})[d] || '', stale = /^stale/.test(nt);
   if (s.length) return s.map(t => `<a class="time${stale ? ' stale' : ''}" href="${esc(bookUrl(v, d, t))}" target="_blank" rel="noopener" title="Book ${dow(d)} ${dnum(d)} at ${esc(t)}${stale ? ' (older check)' : ''}">${esc(short(t))}</a>`).join('');
-  const why = /closed/i.test(nt) ? 'closed' : /error/.test((v.status || {})[d] || '') ? 'check failed' : (v.slots[d] || []).length ? 'nothing in this time range' : 'no tables for ' + P;
+  const why = /closed/i.test(nt) ? 'closed' : /not checked/.test((v.status || {})[d] || '') ? 'not checked for ' + P + ' yet' : /error/.test((v.status || {})[d] || '') ? 'check failed' : (v.slots[d] || []).length ? 'nothing in this time range' : 'no tables for ' + P;
   return `<span class="empty">${dow(d)} ${dnum(d)}: ${why}</span>`;
 }
 function stripHtml(v, cur) {
@@ -180,6 +194,7 @@ function render() {
   document.querySelectorAll('[data-k]').forEach(b => b.classList.toggle('on', b.dataset.k === state.kind));
   document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === state.view));
   document.querySelectorAll('[data-when]').forEach(b => b.classList.toggle('on', b.dataset.when === state.when));
+  document.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', +b.dataset.p === P));
   $('#days').innerHTML = `<button data-d="all" class="${state.day === 'all' ? 'on' : ''}">All<small>9 days</small></button>` + dates.map(d => {
     const n = D.venues.filter(v => slotsFor(v, d).length && (state.kind === 'all' || v.kind === state.kind)).length;
     return `<button data-d="${d}" class="${state.day === d ? 'on' : ''}">${dow(d)} ${dnum(d)}<small>${n} open</small></button>`;
@@ -220,6 +235,7 @@ function render() {
 document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { state.kind = b.dataset.k; state.hood = ''; state.cuisine = ''; render(); });
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { state.view = b.dataset.view; render(); });
 document.querySelectorAll('[data-when]').forEach(b => b.onclick = () => { state.when = b.dataset.when; render(); });
+document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { state.party = +b.dataset.p; applyParty(state.party); render(); });
 $('#only').onchange = e => { state.open = e.target.checked; render(); };
 $('#onl').onchange = e => { state.online = e.target.checked; render(); };
 $('#sort').onchange = e => { state.sort = e.target.value; render(); };

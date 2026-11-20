@@ -86,7 +86,17 @@ def build_data(res: dict) -> dict:
                      if vb.get(k)} or None,
             "checked": r.get("checked_at", ""),
         })
-    return {"generated_at": res["generated_at"], "party": res.get("party", 4),
+    # Other party sizes: results_p{N}.json from `check.py --party N --out results_pN.json`.
+    by_size = {}
+    for n in range(2, 9):
+        if n == res.get("party", 4):
+            continue
+        rr = load_json(HERE / f"results_p{n}.json", None)
+        if rr and rr.get("venues"):
+            by_size[str(n)] = {"at": rr.get("generated_at", ""),
+                               "v": {r["name"]: [r.get("slots", {}), r.get("status", {}), r.get("day_notes", {})]
+                                     for r in rr["venues"]}}
+    return {"generated_at": res["generated_at"], "party": res.get("party", 4), "by_size": by_size,
             "window": res.get("window", {}), "dates": res["dates"], "venues": venues,
             "platforms": PLATFORM}
 
@@ -128,6 +138,8 @@ padding:6px 9px;border-radius:10px;cursor:pointer;line-height:1.1;text-align:cen
 .search{border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-size:13px;padding:7px 12px;border-radius:10px;width:160px;height:34px}
 .search:focus,.sel:focus{outline:2px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:1px}
 .seg.when button,.seg.vseg button{padding:5px 12px;font-size:13px}
+.seg.party{align-items:center}.seg.party .plbl{font-size:12px;color:var(--soft);padding:0 6px 0 10px;letter-spacing:.02em}.seg.party button{padding:5px 10px;font-size:13px;font-variant-numeric:tabular-nums}
+.pnote{margin:0 0 12px;font-size:13px;color:var(--soft)}
 .vseg button{display:inline-flex;align-items:center;gap:6px}.vseg svg{fill:currentColor}
 .vseg{margin-left:auto}
 .sel{-webkit-appearance:none;appearance:none;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:13px;height:34px;padding:0 30px 0 12px;
@@ -259,7 +271,7 @@ foot,footer{display:block;max-width:1240px;margin:0 auto;padding:10px 20px 50px;
 .row1{gap:8px 6px}.row1 .seg:first-of-type{flex:1 1 0;min-width:0}.row1 .seg:first-of-type button{flex:1;padding:6px 6px;font-size:13px}
 .vseg{margin-left:0}.vseg button{padding:6px 9px}
 .row2{display:none;padding-bottom:4px}.bar.open{position:static}.bar.open .row2{display:flex}.search{width:100%;order:-1}
-.seg.when{flex:1 1 100%}.seg.when button{flex:1;padding:6px 4px}.sel{flex:1 1 40%;max-width:none}.tog{flex:1 1 40%}
+.seg.party{flex:1 1 100%}.seg.party button{flex:1;padding:6px 0}.seg.when{flex:1 1 100%}.seg.when button{flex:1;padding:6px 4px}.sel{flex:1 1 40%;max-width:none}.tog{flex:1 1 40%}
 .sortl{flex:1 1 55%}.sortl .sel{flex:1}.sec-h h2{font-size:32px}.sec-h span{flex-basis:100%}
 .acts{flex-wrap:wrap}.acts .book{flex-basis:100%}.acts .sbtn{flex:1;padding:9px 0}
 .row{padding:8px 10px;gap:10px}.r-th{width:48px;height:48px}.row{grid-template-columns:22px 48px minmax(0,1fr) 38px}.r-name{font-size:19px}}
@@ -524,7 +536,7 @@ def render(res: dict) -> str:
 <style>{CSS}{KIT_CSS}</style></head><body>
 <div class="kit-glow" aria-hidden="true"></div><div class="kit-grain" aria-hidden="true"></div>
 <header class="top"><nav class="switch" aria-label="Pages"><a href="../trip/">Plan</a><a href="./" aria-current="page">Tables</a><a href="../map/">Map</a></nav>
-<div class="eyebrow">Dallas · Beli's best · table for {data['party']}</div>
+<div class="eyebrow">Dallas · Beli's best · table for <span id="pnum">{data['party']}</span></div>
 <h1 class="serif">Dallas Tables</h1>
 <p class="lede">Open reservations between <b>5 and 10 PM</b>, <b>{d0:%a %b} {d0.day} – {d1:%a %b} {d1.day}</b>, at the best-rated restaurants and bars on Beli,
 ranked by the Beli community average. Tap any time to jump straight to that table. <b data-count="{total}">{total:,}</b> open times right now ·
@@ -532,6 +544,7 @@ updated {gen:%a %-I:%M %p} CT.</p></header>
 <div class="bar"><div class="bar-in">
 <div class="row1">
 <div class="seg" role="group" aria-label="Show"><button data-k="restaurant">Restaurants</button><button data-k="bar">Bars</button><button data-k="all">Both</button></div>
+<div class="seg party" role="group" aria-label="Party size"><span class="plbl">For</span><button data-p="2">2</button><button data-p="3">3</button><button data-p="4">4</button><button data-p="5">5</button><button data-p="6">6</button><button data-p="7">7</button><button data-p="8">8</button></div>
 <div class="days" id="days"></div>
 <button class="fbtn" id="fbtn" aria-expanded="false" aria-controls="filters" aria-label="Filters"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M2 3h12M4.5 8h7M7 13h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span class="lbl">Filters</span><i id="fcount"></i></button>
 <div class="seg vseg" role="group" aria-label="View"><button data-view="cards" title="Cards" aria-label="Cards"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="2" y="2" width="5" height="5" rx="1.2"/><rect x="9" y="2" width="5" height="5" rx="1.2"/><rect x="2" y="9" width="5" height="5" rx="1.2"/><rect x="9" y="9" width="5" height="5" rx="1.2"/></svg><span class="lbl">Cards</span></button><button data-view="list" title="List" aria-label="List"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="2" y="2.5" width="12" height="3" rx="1"/><rect x="2" y="6.5" width="12" height="3" rx="1"/><rect x="2" y="10.5" width="12" height="3" rx="1"/></svg><span class="lbl">List</span></button></div>
