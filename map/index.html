@@ -253,7 +253,7 @@ border-top:1px solid var(--line);box-shadow:0 -14px 44px -12px rgba(0,0,0,.4)}
 <body>
 <header class="bar"><div class="bar-in">
   <div class="r1">
-    <nav class="switch" aria-label="Pages"><a href="../trip/">Plan</a><a href="../site/">Tables</a><a href="./" aria-current="page">Map</a></nav>
+    <nav class="switch" aria-label="Pages"><a href="../trip/">Plan</a><a href="/tables/dallas/">Tables</a><a href="./" aria-current="page">Map</a></nav>
     <h1 class="ttl serif">Dallas tables</h1>
     <div class="seg kind" role="group" aria-label="Kind"><button data-k="restaurant">Restaurants</button><button data-k="bar">Bars</button><button data-k="all">Both</button></div>
   </div>
@@ -341,8 +341,8 @@ const scoreCol = a => a == null ? '#7a7368' : a >= 9 ? '#1f6b46' : a >= 8.5 ? '#
 // ---- data (fetched live so the 3-hourly results.json update shows without a rebuild) ----
 const get = (u, fb) => fetch(u, {cache: 'no-cache'}).then(r => r.ok ? r.text() : null).catch(() => null).then(t => t == null ? fb : t);
 const json = t => { try { return typeof t === 'string' ? JSON.parse(t) : t; } catch (e) { return null; } };
-const [rT, vT, mT, bT, gT, viT] = await Promise.all([get('../results.json'), get('../venues.json', '[]'), get('../media.json', '{}'),
-  get('../beli_avgs.jsonl', ''), get('./geo.json', '{}'), get('../vibes.json', '{}')]);
+const [rT, vT, mT, bT, gT, viT] = await Promise.all([get('/tables/cities/dallas/results/p4.json'), get('/tables/cities/dallas/venues.json', '[]'), get('/tables/cities/dallas/media.json', '{}'),
+  get('/tables/cities/dallas/beli.jsonl', ''), get('./geo.json', '{}'), get('/tables/cities/dallas/vibes.json', '{}')]);
 const res = json(rT);
 if (!res) { $('#emsg').textContent = "Couldn't load results.json"; $('#emsg').classList.remove('hide'); return; }
 const meta = Object.fromEntries((json(vT) || []).map(v => [v.name, v]));

@@ -253,7 +253,7 @@ html.kit-lock{overflow:hidden}
 <body>
 <div class="kit-glow" aria-hidden="true"></div><div class="kit-grain" aria-hidden="true"></div>
 <div class="wrap">
-  <nav class="switch" aria-label="Pages"><a href="./" aria-current="page">Plan</a><a href="../site/">Tables</a><a href="../map/">Map</a></nav>
+  <nav class="switch" aria-label="Pages"><a href="./" aria-current="page">Plan</a><a href="/tables/dallas/">Tables</a><a href="../map/">Map</a></nav>
   <header>
     <div class="top">
       <div>
@@ -317,7 +317,7 @@ html.kit-lock{overflow:hidden}
   </div>
 
   <footer>
-    Dinner ideas come from the read-only <a href="../site/">Tables page</a> (party of 4, 5–10 PM), refreshed every few hours. They're openings, not holds.
+    Dinner ideas come from the read-only <a href="/tables/dallas/">Tables page</a> (party of 4, 5–10 PM), refreshed every few hours. They're openings, not holds.
   </footer>
 </div>
 
@@ -561,7 +561,7 @@ function picks(d){
 }
 
 function dinnerBlock(d){
-  const grid=`<a href="../site/#d=${d}">See all of ${dow(d)} in the tables</a>`;
+  const grid=`<a href="/tables/dallas/#d=${d}">See all of ${dow(d)} in the tables</a>`;
   if(DATA_ERR)return `<div class="dinner"><div class="foot">Couldn't load live openings. ${grid}.</div></div>`;
   if(!DATA)return `<div class="dinner"><div class="foot">Loading openings…</div></div>`;
   const ps=picks(d);
@@ -615,8 +615,8 @@ const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"});
 const h=location.hash.slice(1);
 pick(DAYS.some(x=>x.d===h)?h:DAYS.some(x=>x.d===today)?today:DAYS[0].d,false);
 
-var VIBES={};fetch("../vibes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>{VIBES=j||{};if(DATA)renderDay()}).catch(()=>{});
-fetch("../results.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()})
+var VIBES={};fetch("/tables/cities/dallas/vibes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>{VIBES=j||{};if(DATA)renderDay()}).catch(()=>{});
+fetch("/tables/cities/dallas/results/p4.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()})
   .then(j=>{DATA=j;renderDay()}).catch(()=>{DATA_ERR=true;renderDay()});
 
 Kit.buzzOn(".g, .theme, .dinner a, .pan button, .pan-t");
@@ -681,7 +681,7 @@ function whoCount(d){
 }
 
 function load(){ // party size switch is postponed: openings are always for 4
-  return cache[4]||(cache[4]=fetch("../results.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>({data:j})).catch(()=>({data:null})));
+  return cache[4]||(cache[4]=fetch("/tables/cities/dallas/results/p4.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>({data:j})).catch(()=>({data:null})));
 }
 
 function defaultNight(){
@@ -785,8 +785,8 @@ function init(){
   });
   Promise.all([
     fetch("../map/geo.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>GEO=j.venues||{}).catch(()=>{}),
-    fetch("../media.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>MEDIA=j||{}).catch(()=>{}),
-    fetch("../vibes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>{if(!Object.keys(window.VIBES||{}).length)window.VIBES=j||{}}).catch(()=>{}),
+    fetch("/tables/cities/dallas/media.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>MEDIA=j||{}).catch(()=>{}),
+    fetch("/tables/cities/dallas/vibes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).then(j=>{if(!Object.keys(window.VIBES||{}).length)window.VIBES=j||{}}).catch(()=>{}),
   ]).then(render);
   setNight(defaultNight());
 }
