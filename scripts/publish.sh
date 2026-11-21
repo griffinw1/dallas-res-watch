@@ -11,6 +11,12 @@
 set -euo pipefail
 OWN="${1:?usage: publish.sh <comma platforms> [extra check.py args]}"; shift || true
 cd "$(dirname "$0")/.."
+# One run at a time (the 3-hourly job and the "Pull again" button share this). Exit 75 = busy.
+LOCK="$HOME/.dallas-res-watch/run.lock"; mkdir -p "$HOME/.dallas-res-watch"
+if ! mkdir "$LOCK" 2>/dev/null; then
+  if [ -n "$(find "$LOCK" -maxdepth 0 -mmin +60 2>/dev/null)" ]; then rmdir "$LOCK"; mkdir "$LOCK"; else echo "another run is in progress"; exit 75; fi
+fi
+trap 'rmdir "$LOCK" 2>/dev/null || true' EXIT
 PY="${PYTHON:-$( [ -x .venv/bin/python ] && echo .venv/bin/python || echo python3 )}"
 ALL="resy,sevenrooms,opentable,tock,phone,walkin,unknown"
 OTHER=$(echo "$ALL" | tr ',' '\n' | grep -vxF -f <(echo "$OWN" | tr ',' '\n') | paste -sd, - || true)
@@ -25,9 +31,11 @@ if [ -n "$HAS_REMOTE" ] && [ -z "${NO_PUSH:-}" ]; then git pull -q --rebase --au
 # rate-limits hard, so it gets ONE size per run, rotating every 3 h. NO_SIZES=1 skips this.
 if [ -z "${NO_SIZES:-}" ]; then
   SIZES=(2 3 5 6 7 8); OTS=${SIZES[$(( ($(date +%s) / 10800) % 6 ))]}
+  # PULL_SIZES="5" (from the button): only those sizes, every platform.
+  [ -n "${PULL_SIZES:-}" ] && { read -ra SIZES <<< "$PULL_SIZES"; OTS=all; }
   for n in "${SIZES[@]}"; do
     PL=$(echo "$OWN" | tr ',' '\n' | grep -vx opentable | paste -sd, - || true)
-    [ "$n" = "$OTS" ] && PL="$OWN"
+    [ "$n" = "$OTS" ] || [ "$OTS" = all ] && PL="$OWN"
     [ -n "$PL" ] && { "$PY" check.py --platforms "$PL" --party "$n" --out "results_p$n.json" --delay 0.4-0.9 "$@" | tail -1 || true; }
   done
 fi

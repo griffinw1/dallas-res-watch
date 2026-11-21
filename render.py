@@ -98,8 +98,10 @@ def build_data(res: dict) -> dict:
                                      for r in rr["venues"]}}
     return {"generated_at": res["generated_at"], "party": res.get("party", 4), "by_size": by_size,
             "window": res.get("window", {}), "dates": res["dates"], "venues": venues,
-            "platforms": PLATFORM}
+            "platforms": PLATFORM, "pull_topic": PULL_TOPIC}
 
+
+PULL_TOPIC = (HERE / "scripts" / "pull_topic.txt").read_text().strip()  # ntfy.sh topic the Mac listens on
 
 CSS = r"""
 :root{--bg:#f6f3ee;--paper:#fffdf9;--ink:#1c1a17;--soft:#6b655c;--faint:#a39c91;--line:#e7e1d6;
@@ -120,6 +122,20 @@ a{color:inherit}
 h1{font-size:clamp(40px,7vw,68px);line-height:1;margin:8px 0 10px}
 .lede{color:var(--soft);max-width:720px;margin:0}
 .lede b{color:var(--ink);font-weight:600}
+.pull{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:14px 0 2px;font-size:13.5px;color:var(--soft)}
+.pull b{color:var(--ink);font-weight:600}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--open);flex:0 0 auto;box-shadow:0 0 0 3px var(--openbg)}
+.pull.stale .pdot{background:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 20%,transparent)}
+.pull.busy .pdot{background:var(--accent);animation:pblink 1s ease-in-out infinite}
+@keyframes pblink{50%{opacity:.25}}
+.pbtn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
+.pbtn:hover{border-color:var(--accent);color:var(--accent)}
+.pbtn:disabled{opacity:.55;cursor:default;color:var(--soft);border-color:var(--line)}
+.pull.busy .pbtn svg{animation:pspin 1.1s linear infinite}
+@keyframes pspin{to{transform:rotate(360deg)}}
+.pmsg{flex:1 1 100%;font-size:13px}.pmsg:empty{display:none}
+.pmsg.err{color:var(--accent)}.pmsg.ok{color:var(--open)}
+@media (prefers-reduced-motion:reduce){.pull.busy .pdot,.pull.busy .pbtn svg{animation:none}}
 .bar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(12px);
 -webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line)}
 .bar-in{max-width:1240px;margin:0 auto;padding:10px 20px;display:flex;flex-direction:column;gap:8px}
@@ -539,8 +555,10 @@ def render(res: dict) -> str:
 <div class="eyebrow">Dallas · Beli's best · table for <span id="pnum">{data['party']}</span></div>
 <h1 class="serif">Dallas Tables</h1>
 <p class="lede">Open reservations between <b>5 and 10 PM</b>, <b>{d0:%a %b} {d0.day} – {d1:%a %b} {d1.day}</b>, at the best-rated restaurants and bars on Beli,
-ranked by the Beli community average. Tap any time to jump straight to that table. <b data-count="{total}">{total:,}</b> open times right now ·
-updated {gen:%a %-I:%M %p} CT.</p></header>
+ranked by the Beli community average. Tap any time to jump straight to that table. <b data-count="{total}">{total:,}</b> open times right now.</p>
+<div class="pull" id="pull"><span class="pdot" aria-hidden="true"></span><span class="ptxt" id="ptxt">Last pull <b>{gen:%a %-I:%M %p}</b> CT</span>
+<button class="pbtn" id="pbtn" type="button"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Pull again</span></button>
+<span class="pmsg" id="pmsg" role="status" aria-live="polite"></span></div></header>
 <div class="bar"><div class="bar-in">
 <div class="row1">
 <div class="seg" role="group" aria-label="Show"><button data-k="restaurant">Restaurants</button><button data-k="bar">Bars</button><button data-k="all">Both</button></div>

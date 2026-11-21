@@ -257,3 +257,71 @@ document.querySelector('main').addEventListener('click', e => {
 });
 Kit.buzzOn('.time, .book, .mini.has, .strip button, .days button, .seg button');
 render();
+
+// ---- Last pull + "Pull again" -------------------------------------------------------------
+// The button posts to a private ntfy.sh topic; scripts/pull_listener.py on the Mac hears it,
+// runs publish.sh, and reports back on <topic>-s (started / busy / cooldown / done / failed).
+(() => {
+  const T = D.pull_topic, box = $('#pull'), txt = $('#ptxt'), btn = $('#pbtn'), msg = $('#pmsg');
+  if (!T || !box) return;
+  const NT = 'https://ntfy.sh/';
+  const clock = d => d.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago'});
+  const day = d => d.toLocaleDateString('en-US', {weekday: 'short', timeZone: 'America/Chicago'});
+  const ago = d => { const m = Math.round((Date.now() - d) / 60000);
+    if (m < 1) return 'just now'; if (m < 60) return m + ' min ago';
+    const h = Math.floor(m / 60), r = m % 60; return h + ' hr' + (r && h < 6 ? ' ' + r + ' min' : '') + ' ago'; };
+  const atFor = () => { const s = P === D.party ? D.generated_at : ((D.by_size || {})[P] || {}).at; return s ? new Date(s) : null; };
+  let busy = false;
+  const paint = () => {
+    const d = atFor();
+    if (!d) { txt.innerHTML = 'Party of ' + P + ' <b>not pulled yet</b>'; box.classList.add('stale'); return; }
+    txt.innerHTML = 'Last pull <b>' + ago(d) + '</b> · ' + day(d) + ' ' + clock(d) + ' CT' + (P !== D.party ? ' · for ' + P : '');
+    box.classList.toggle('stale', Date.now() - d > 3.5 * 3600e3);
+  };
+  const say = (t, cls = '') => { msg.textContent = t; msg.className = 'pmsg ' + cls; };
+  const setBusy = b => { busy = b; box.classList.toggle('busy', b); btn.disabled = b; btn.querySelector('span').textContent = b ? 'Pulling…' : 'Pull again'; };
+  paint(); setInterval(paint, 30e3);
+  document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => setTimeout(paint)));
+
+  // Once the Mac has pushed, wait for GitHub Pages to serve the new data, then reload.
+  const waitForSite = (at) => {
+    const want = new Date(at || Date.now() - 6e4), t0 = Date.now();
+    say('Pulled. Publishing the new times (about a minute)…');
+    const tick = async () => {
+      try { const r = await fetch('../results.json?t=' + Date.now(), {cache: 'no-store'}); const j = await r.json();
+        if (new Date(j.generated_at) >= want - 1000) { say('✓ Updated. Reloading…', 'ok'); setTimeout(() => location.reload(), 600); return; } } catch (e) {}
+      if (Date.now() - t0 > 4 * 60e3) { setBusy(false); say('Pulled, but the site hasn\'t refreshed yet. Reload the page in a minute.', 'err'); return; }
+      setTimeout(tick, 8e3);
+    };
+    tick();
+  };
+  let es, noReply;
+  const listen = () => {
+    if (es) return;
+    es = new EventSource(NT + T + '-s/sse');
+    es.onmessage = e => {
+      let m; try { m = JSON.parse(JSON.parse(e.data).message); } catch (x) { return; }
+      if (!m || !m.state) return;
+      clearTimeout(noReply);
+      if (m.state === 'started') { setBusy(true); say('The Mac is pulling fresh times now. This usually takes 3–6 minutes. You can leave this page open.'); }
+      else if (m.state === 'busy') { setBusy(true); say('A pull is already running on the Mac. Watching it…'); }
+      else if (m.state === 'cooldown') { setBusy(false); say('Not pulled: the last pull was only ' + (m.mins ?? 'a few') + ' min ago. Try again after ' + clock(new Date(m.next)) + '.', 'err'); close(); }
+      else if (m.state === 'failed') { setBusy(false); say('✗ The pull failed on the Mac. The times shown are still from the last pull.', 'err'); close(); }
+      else if (m.state === 'done') { close(); waitForSite(m.at); }
+    };
+  };
+  const close = () => { if (es) { es.close(); es = null; } };
+  btn.onclick = async () => {
+    if (busy) return;
+    setBusy(true); say('Asking the Mac to pull…'); listen();
+    try { await fetch(NT + T, {method: 'POST', body: JSON.stringify({party: P})}); }
+    catch (e) { setBusy(false); close(); say('✗ Couldn\'t send the request (no connection?). Nothing was pulled.', 'err'); return; }
+    noReply = setTimeout(() => { setBusy(false); close();
+      say('✗ The Mac didn\'t answer, so nothing was pulled. It\'s probably asleep or offline. Pulls resume automatically when it wakes.', 'err'); }, 45e3);
+  };
+  // A pull someone else started in the last 15 min? Show it.
+  fetch(NT + T + '-s/json?poll=1&since=15m').then(r => r.text()).then(t => {
+    const last = t.trim().split('\n').filter(Boolean).map(l => { try { return JSON.parse(JSON.parse(l).message); } catch (e) { return null; } }).filter(Boolean).pop();
+    if (last && (last.state === 'started' || last.state === 'busy')) { setBusy(true); say('A pull is running on the Mac right now…'); listen(); }
+  }).catch(() => {});
+})();
